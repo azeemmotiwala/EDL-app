@@ -1,6 +1,6 @@
 # edl_app
 
-A new Flutter project.
+A back new Flutter project.
 
 ## Getting Started
 
