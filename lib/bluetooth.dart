@@ -14,13 +14,6 @@ class _BluetoothState extends State<Bluetooth> {
   // FlutterBluePlus flutterBlue = FlutterBluePlus.instance;
   List<BluetoothDevice> devices = [];
 
-  // @override
-  void initState() {
-    super.initState();
-    print("init state");
-    startScanning();
-  }
-
   void startScanning() async {
     print("waiting for scan");
     FlutterBluePlus.startScan();
@@ -39,8 +32,16 @@ class _BluetoothState extends State<Bluetooth> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    print("init state");
+    startScanning();
+  }
+
+  @override
   Widget build(BuildContext context) {
     print("in build");
+
     return Scaffold(
       appBar: AppBar(
         title: Text('BLE Scanner'),
