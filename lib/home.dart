@@ -14,7 +14,10 @@ class _HomeState extends State<Home> {
     return Scaffold(
       drawer: SideBar(),
       appBar: AppBar(
-        title: Text("Home Screen"),
+        backgroundColor: Colors.blue[900],
+        centerTitle: true,
+        title: Text("Dashboard"),
+        elevation: 0.0,
       ),
     );
   }

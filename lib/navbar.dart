@@ -1,3 +1,4 @@
+import 'package:edl_app/login.dart';
 import 'package:flutter/material.dart';
 
 class SideBar extends StatefulWidget {
@@ -43,6 +44,23 @@ class _SideBarState extends State<SideBar> {
           ListTile(
             leading: Icon(Icons.notifications),
             title: Text('Request'),
+            onTap: () => null,
+            trailing: ClipOval(
+              child: Container(
+                color: Colors.red,
+                width: 20,
+                height: 20,
+                child: Center(
+                  child: Text(
+                    '8',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
           Divider(),
           ListTile(
@@ -52,8 +70,10 @@ class _SideBarState extends State<SideBar> {
           ),
           ListTile(
             leading: Icon(Icons.description),
-            title: Text('Policies'),
-            onTap: () => null,
+            title: Text('Create Account'),
+            onTap: () {
+              Navigator.pushNamed(context, '/login');
+            },
           ),
           Divider(),
           ListTile(
