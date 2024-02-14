@@ -47,6 +47,20 @@ class _LoginState extends State<Login> {
             ),
           )
         ),
+                Padding(
+          padding: EdgeInsets.all(20),
+          child: TextField(
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              labelText: 'LDAP ID',
+              // hintText: 'Enter Valid Email ID as abc@gmail.com',
+              labelStyle: TextStyle(
+                fontSize: 20.0,
+                fontWeight: FontWeight.bold,
+              )
+            ),
+          )
+        ),
         Padding(
           padding: EdgeInsets.all(20),
           child: TextField(
@@ -79,8 +93,7 @@ class _LoginState extends State<Login> {
               color: Colors.blue, borderRadius: BorderRadius.circular(20)),
           child: TextButton(
             onPressed: () {
-              // Navigator.push(
-              //     context, MaterialPageRoute(builder: (_) => HomePage()));
+              Navigator.pushReplacementNamed(context, '/home');
             },
             child: Text(
               'Login',
