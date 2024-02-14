@@ -1,3 +1,4 @@
+import 'package:edl_app/signup.dart';
 import 'package:flutter/material.dart';
 import 'package:edl_app/home.dart';
 // import 'package:edl_app/loading.dart';
@@ -12,8 +13,9 @@ void main() {
     initialRoute: '/login',
     routes: {
       // '/': (context) => Loading(),
+      '/signup': (context) => SignupPage(),
       '/home': (context) => Home(),
-      '/login': (context) => Login(),
+      '/login': (context) => LoginPage(),
     },
   ));
   // minor change

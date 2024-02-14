@@ -1,109 +1,111 @@
 import 'package:flutter/material.dart';
 
-
-class Login extends StatefulWidget {
-
-  @override
-  State<Login> createState() => _LoginState();
-}
-
-class _LoginState extends State<Login> {
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text("Login Page"),
-        backgroundColor: Colors.blue[900],
-        elevation: 0.0,
-      ),
-      body: Column(children: [
-        Center(
-          child: Container(
-            height: 150,
-            width: 190,
-            padding: EdgeInsets.fromLTRB(0, 40, 0, 0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(200),
-              // color: Colors.red,
-            ),
-            child: Center(
-              child: Image.asset('assets/WEL-logo.png')
-            )
-          ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: Container(
+          margin: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _header(context),
+              _inputField(context),
+              _forgotPassword(context),
+              _signup(context),
+            ],
+          ), 
         ),
-        Padding(
-          padding: EdgeInsets.all(20),
-          child: TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'User Name',
-              hintText: 'Enter Valid Email ID as abc@gmail.com',
-              labelStyle: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              )
-            ),
-          )
-        ),
-                Padding(
-          padding: EdgeInsets.all(20),
-          child: TextField(
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'LDAP ID',
-              // hintText: 'Enter Valid Email ID as abc@gmail.com',
-              labelStyle: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              )
-            ),
-          )
-        ),
-        Padding(
-          padding: EdgeInsets.all(20),
-          child: TextField(
-            obscureText: true,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: 'Password',
-              hintText: 'Enter your secure password',
-              labelStyle: TextStyle(
-                fontSize: 20.0,
-                fontWeight: FontWeight.bold,
-              )
-            ),
-          )
-        ),
-        TextButton(
-          onPressed:(){}, 
-          child: Text(
-            "Forgot Password?",
-            style: TextStyle(
-              color: Colors.blue[900],
-              fontSize: 15.0,
-            ),
-          )
-        ),
-        Container(
-          height: 50,
-          width: 250,
-          decoration: BoxDecoration(
-              color: Colors.blue, borderRadius: BorderRadius.circular(20)),
-          child: TextButton(
-            onPressed: () {
-              Navigator.pushReplacementNamed(context, '/home');
-            },
-            child: Text(
-              'Login',
-              style: TextStyle(color: Colors.white, fontSize: 25),
-            ),
-          ),
-        ),
-      ],
       ),
     );
   }
+
+  _header(context) {
+    return const Column(
+      children: [
+        Text(
+          "Welcome Back",
+          style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+        ),
+        Text("Enter your credential to login"),
+      ],
+    );
+  }
+
+  _inputField(context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TextField(
+          decoration: InputDecoration(
+              hintText: "Username",
+              border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(18),
+                  borderSide: BorderSide.none
+              ),
+              fillColor: Colors.purple.withOpacity(0.1),
+              filled: true,
+              prefixIcon: const Icon(Icons.person)),
+        ),
+        const SizedBox(height: 10),
+        TextField(
+          decoration: InputDecoration(
+            hintText: "Password",
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(18),
+                borderSide: BorderSide.none),
+            fillColor: Colors.purple.withOpacity(0.1),
+            filled: true,
+            prefixIcon: const Icon(Icons.password),
+          ),
+          obscureText: true,
+        ),
+        const SizedBox(height: 10),
+        ElevatedButton(
+          onPressed: () {
+          },
+          style: ElevatedButton.styleFrom(
+            shape: const StadiumBorder(),
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            backgroundColor: Colors.purple,
+          ),
+          child: const Text(
+            "Login",
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            
+          ),
+        )
+      ],
+    );
+  }
+
+  _forgotPassword(context) {
+    return TextButton(
+      onPressed: () {},
+      child: const Text("Forgot password?",
+        style: TextStyle(color: Colors.purple),
+      ),
+    );
+  }
+
+  _signup(context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text("Dont have an account? "),
+        TextButton(
+            onPressed: () {
+              Navigator.pushNamed(context, '/signup');
+            },
+            child: const Text("Sign Up", style: TextStyle(color: Colors.purple),)
+        )
+      ],
+    );
+  }
 }
+
 
