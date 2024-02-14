@@ -4,7 +4,7 @@ import 'package:edl_app/home.dart';
 import 'package:edl_app/login.dart';
 
 void main() {
-  runApp(MaterialApp(
+  runApp(MaterialApp( 
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
