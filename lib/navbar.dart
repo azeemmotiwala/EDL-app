@@ -27,16 +27,6 @@ class _SideBarState extends State<SideBar> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text('Favorites'),
-            onTap: () => null,
-          ),
-          ListTile(
-            leading: Icon(Icons.person),
-            title: Text('Friends'),
-            onTap: () => null,
-          ),
-          ListTile(
             leading: Icon(Icons.share),
             title: Text('Share'),
             onTap: () => null,
@@ -68,17 +58,10 @@ class _SideBarState extends State<SideBar> {
             title: Text('Settings'),
             onTap: () => null,
           ),
-          ListTile(
-            leading: Icon(Icons.description),
-            title: Text('Create Account'),
-            onTap: () {
-              Navigator.pushNamed(context, '/login');
-            },
-          ),
           Divider(),
           ListTile(
-            title: Text('Exit'),
-            leading: Icon(Icons.exit_to_app),
+            title: Text('Log Out'),
+            leading: Icon(Icons.logout),
             onTap: () => null,
           ),
         ],
