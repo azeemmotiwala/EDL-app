@@ -21,7 +21,7 @@ void showSnack(String title) {
 
 Future<bool> checkUsername(String username) async {
   final response = await http
-      .get(Uri.parse('http://192.168.0.120:8000/check-username/${username}'));
+      .get(Uri.parse('http://10.42.0.34:8000/check-username/${username}'));
 
   if (response.statusCode == 200) {
     Map<String, dynamic> data = json.decode(response.body);
@@ -33,7 +33,7 @@ Future<bool> checkUsername(String username) async {
 
 Future<bool> checkPassword(String password) async {
   final response = await http
-      .get(Uri.parse('http://192.168.0.120:8000/check-password/${password}'));
+      .get(Uri.parse('http://10.42.0.34:8000/check-password/${password}'));
 
   if (response.statusCode == 200) {
     Map<String, dynamic> data = json.decode(response.body);
@@ -80,7 +80,7 @@ class LoginPage extends StatelessWidget {
     return const Column(
       children: [
         Text(
-          "Welcome Back",
+          "EDL App",
           style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
         ),
         Text("Enter your credential to login"),
@@ -99,7 +99,7 @@ class LoginPage extends StatelessWidget {
               border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(18),
                   borderSide: BorderSide.none),
-              fillColor: Colors.purple.withOpacity(0.1),
+              fillColor: Colors.red.withOpacity(0.1),
               filled: true,
               prefixIcon: const Icon(Icons.person)),
         ),
@@ -111,7 +111,7 @@ class LoginPage extends StatelessWidget {
             border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
                 borderSide: BorderSide.none),
-            fillColor: Colors.purple.withOpacity(0.1),
+            fillColor: Colors.red.withOpacity(0.1),
             filled: true,
             prefixIcon: const Icon(Icons.password),
           ),
@@ -120,7 +120,7 @@ class LoginPage extends StatelessWidget {
         const SizedBox(height: 10),
         ElevatedButton(
           onPressed: () async {
-            Navigator.pushReplacementNamed(context, '/home');
+            // Navigator.pushReplacementNamed(context, '/home');
             // If the credentials are valid, proceed to the home screen
             if (usernameController.text.isNotEmpty &&
                 passwordController.text.isNotEmpty) {
@@ -154,7 +154,7 @@ class LoginPage extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             shape: const StadiumBorder(),
             padding: const EdgeInsets.symmetric(vertical: 16),
-            backgroundColor: Colors.purple,
+            backgroundColor: Colors.red[700],
           ),
           child: const Text(
             "Login",
@@ -171,9 +171,9 @@ class LoginPage extends StatelessWidget {
   _forgotPassword(context) {
     return TextButton(
       onPressed: () {},
-      child: const Text(
+      child: Text(
         "Forgot password?",
-        style: TextStyle(color: Colors.purple),
+        style: TextStyle(color: Colors.red[700]),
       ),
     );
   }
@@ -187,9 +187,9 @@ class LoginPage extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(context, '/signup');
             },
-            child: const Text(
+            child: Text(
               "Sign Up",
-              style: TextStyle(color: Colors.purple),
+              style: TextStyle(color: Colors.red[700]),
             ))
       ],
     );
