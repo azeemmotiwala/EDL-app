@@ -4,11 +4,13 @@
 
 import 'dart:convert';
 
+import 'package:edl_app/issue.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart';
+import 'package:edl_app/connection.dart';
 
-final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey =
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
 
 void showSnack(String title) {
@@ -20,105 +22,59 @@ void showSnack(String title) {
       fontSize: 15,
     ),
   ));
-  scaffoldMessengerKey.currentState?.showSnackBar(snackbar);
+  scaffoldMessengerKeyscan.currentState?.showSnackBar(snackbar);
 }
 
-class Bluetooth extends StatelessWidget {
+class IssuePage extends StatelessWidget {
+
+  final String rollNo;
+  final String location;
+  IssuePage({required this.rollNo, required this.location});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: BleScanner(),
-    );
-  }
-}
-
-class ConnectionWidget extends StatelessWidget {
-  final bool isConnected;
-  final VoidCallback onConnectPressed;
-
-  ConnectionWidget({required this.isConnected, required this.onConnectPressed});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16),
-      // decoration: BoxDecoration(
-      //         gradient: LinearGradient(
-      //   colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],
-      // ),
-
-      //   gradient: LinearGradient(
-      //     colors: [
-      //       Color.fromARGB(255, 192, 157, 157),
-      //       Color.fromARGB(255, 229, 226, 223)
-      //     ],
-      //   ),
-      // ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                isConnected ? 'Connected to Reader' : 'Not Connected    ',
-                style: TextStyle(fontSize: 16),
-              ),
-              SizedBox(
-                width: 10,
-              ),
-            ],
-          ),
-          SizedBox(height: 40),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: onConnectPressed,
-                child: Text(
-                  isConnected ? 'Disconnect' : 'Connect',
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
+      home: BleScanner(rollNo: rollNo, location: location),
     );
   }
 }
 
 class BleScanner extends StatefulWidget {
+
+  final String rollNo;
+  final String location;
+
+  BleScanner({required this.rollNo, required this.location});
+
   @override
   _BleScannerState createState() => _BleScannerState();
 }
 
 class _BleScannerState extends State<BleScanner> {
-  // FlutterBlue flutterBlue = FlutterBlue.instance;
+  
   List<BluetoothDevice> devices = [];
-  // BluetoothDevice test =
-  // int index = 0;
+  List<String> readValues = [];
   bool check = true;
+  bool isConnected = false;
+
   @override
   void initState() {
     super.initState();
     startScanning();
   }
 
-  List<String> readValues = [];
 
   Future<void> readData(BluetoothDevice device) async {
-    // List<String> tempReadValues = [];
     bool out = false;
-    List<BluetoothService> services = await device.discoverServices();
+    List<BluetoothService> services = await device.discoverServices(timeout: 10000);
     services.forEach((service) async {
       var characteristics = service.characteristics;
       while (!out) {
-        print("hello");
+        // print("hello");
         await Future.delayed(const Duration(seconds: 1));
         for (BluetoothCharacteristic c in characteristics) {
           if (c.properties.read) {
-            // while (true) {
+            while (true) {
             List<int> value = await c.read();
             if (c.characteristicUuid.toString() ==
                 "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
@@ -128,27 +84,41 @@ class _BleScannerState extends State<BleScanner> {
                   // print()
                   readValues.add(String.fromCharCodes(value));
                   print(readValues.length);
+                  out = true;
                 });
-                out = true;
                 break;
               }
             }
           }
         }
       }
-    });
+    }});
   }
 
   Future<void> writeData(BluetoothDevice device) async {
     // List<String> tempReadValues = [];
+
+    final mtu = await device.mtu.first;
+    print(mtu);
+    // await device.requestMtu(512);
+
+    // await device.requestMtu(100);
     List<BluetoothService> services = await device.discoverServices();
     services.forEach((service) async {
       var characteristics = service.characteristics;
       for (BluetoothCharacteristic c in characteristics) {
         if (c.properties.write) {
-          final command = "scan\r";
+          final command = "issue";
           final convertedCommand = AsciiEncoder().convert(command);
           await c.write(convertedCommand);
+          await Future.delayed(const Duration(seconds: 1));
+          final command2 = "${widget.rollNo}";
+          final convertedCommand2 = AsciiEncoder().convert(command2);
+          await c.write(convertedCommand2);
+          await Future.delayed(const Duration(seconds: 1));
+          final command3 = "${widget.location}";
+          final convertedCommand3 = AsciiEncoder().convert(command3);
+          await c.write(convertedCommand3);
         }
       }
     });
@@ -159,6 +129,7 @@ class _BleScannerState extends State<BleScanner> {
     FlutterBluePlus.scanResults.listen((results) {
       for (ScanResult result in results) {
         if (!devices.contains(result.device)) {
+          // print("hello");
           // print("gll");
           setState(() {
             if (result.device.remoteId.toString() == "28:CD:C1:08:97:9C" &&
@@ -173,8 +144,6 @@ class _BleScannerState extends State<BleScanner> {
     });
   }
 
-  bool isConnected = false;
-
   void connectReader(BluetoothDevice device) async {
     // Perform connection logic here
     // For simplicity, we toggle the connection state
@@ -186,9 +155,16 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   @override
+  void dispose() {
+    FlutterBluePlus.stopScan();
+    super.dispose();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      key: scaffoldMessengerKey,
+      key: scaffoldMessengerKeyscan,
       child: Scaffold(
         appBar: AppBar(
           flexibleSpace: Container(
@@ -200,7 +176,7 @@ class _BleScannerState extends State<BleScanner> {
             ),
           ),
           centerTitle: true,
-          title: Text("Scanning Page"),
+          title: Text("Issue Page"),
           elevation: 0.0,
         ),
         body: Column(
@@ -219,7 +195,6 @@ class _BleScannerState extends State<BleScanner> {
                     setState(() {
                       isConnected = !isConnected;
                     });
-
                     showSnack("Disconnected");
                   }
                 }
@@ -235,7 +210,7 @@ class _BleScannerState extends State<BleScanner> {
                     }
                   : null,
               child: Text(
-                'Scan RFID Tag',
+                'Issue Device',
                 style: TextStyle(fontSize: 18),
               ),
             ),
@@ -256,11 +231,6 @@ class _BleScannerState extends State<BleScanner> {
     );
   }
 
-  @override
-  void dispose() {
-    FlutterBluePlus.stopScan();
-    super.dispose();
-  }
 }
 
 

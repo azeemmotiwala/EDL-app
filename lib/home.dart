@@ -38,84 +38,63 @@ class _HomeState extends State<Home> {
                     image: AssetImage('assets/photo1.png'), fit: BoxFit.fill),
               ),
             ),
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 40, 0, 30),
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    width: (MediaQuery.of(context).size.width - 80) / 2,
-                    height: MediaQuery.of(context).size.height / 8,
-                    // color: Colors.red,
-                    child: ElevatedButton(
-                      child: Text("Scan"),
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(context, '/bluetooth');
-                      },
-                    ),
-                    // decoration: BoxDecoration(
-                    // gradient: LinearGradient( colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],),
-                    // borderRadius: BorderRadius.circular(20),
-                    // image: DecorationImage(
-                    //   image: NetworkImage('https://oflutter.com/wp-content/uploads/2021/02/profile-bg3.jpg'),
-                    //   fit: BoxFit.fitHeight
-                    //   ),
+           Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 40, 20, 10),
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 1.5,
+                  height: MediaQuery.of(context).size.height / 10,
+                  child: ElevatedButton(
+                    // style: ElevatedButton.styleFrom(
+                    //   // primary: Colors.red[700], // background color
+                    //   // onPrimary: Colors.white, // text color
                     // ),
+                    child: Text("Scan"),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/scan');
+                    },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 40, 0, 30),
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    width: (MediaQuery.of(context).size.width - 80) / 2,
-                    height: MediaQuery.of(context).size.height / 8,
-                    child: ElevatedButton(
-                      child: Text("Issue"),
-                      onPressed: () {},
-                    ),
-
-                    // decoration: BoxDecoration(
-                    // gradient: LinearGradient( colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 10),
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 1.5,
+                  height: MediaQuery.of(context).size.height / 10,
+                  child: ElevatedButton(
+                    // style: ElevatedButton.styleFrom(
+                    //   primary: Colors.red[500], // background color
+                    //   onPrimary: Colors.white, // text color
                     // ),
-                  ),
-                )
-              ],
-            ),
-            Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 40, 0, 30),
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    width: (MediaQuery.of(context).size.width - 80) / 2,
-                    height: MediaQuery.of(context).size.height / 8,
-
-                    child: ElevatedButton(
-                      child: Text("Return"),
-                      onPressed: () {},
-                    ),
-                    // decoration: BoxDecoration(
-                    // gradient: LinearGradient( colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],),
-                    // ),
+                    child: Text("Issue"),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/issue');
+                    },
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(40, 40, 0, 30),
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    width: (MediaQuery.of(context).size.width - 80) / 2,
-                    height: MediaQuery.of(context).size.height / 8,
-                    child: ElevatedButton(
-                      child: Text("Products"),
-                      onPressed: () {},
-                    ),
-                    // decoration: BoxDecoration(
-                    // gradient: LinearGradient( colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 10, 20, 30),
+                child: Container(
+                  width: MediaQuery.of(context).size.width / 1.5,
+                  height: MediaQuery.of(context).size.height / 10,
+                  child: ElevatedButton(
+                    // style: ElevatedButton.styleFrom(
+                    //   primary: Colors.red[300], // background color
+                    //   onPrimary: Colors.white, // text color
                     // ),
+                    child: Text("Return"),
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/return');
+                    },
                   ),
-                )
-              ],
-            ),
+                ),
+              ),
+            ],
+          ),
+
           ],
         ));
   }

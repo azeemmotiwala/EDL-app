@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:edl_app/api.dart';
 
 final TextEditingController usernameController = TextEditingController();
 final TextEditingController passwordController = TextEditingController();
@@ -17,30 +18,6 @@ void showSnack(String title) {
     ),
   ));
   scaffoldMessengerKey.currentState?.showSnackBar(snackbar);
-}
-
-Future<bool> checkUsername(String username) async {
-  final response = await http
-      .get(Uri.parse('http://10.42.0.34:8000/check-username/${username}'));
-
-  if (response.statusCode == 200) {
-    Map<String, dynamic> data = json.decode(response.body);
-    return data['exists'];
-  } else {
-    throw Exception('Failed to load username');
-  }
-}
-
-Future<bool> checkPassword(String password) async {
-  final response = await http
-      .get(Uri.parse('http://10.42.0.34:8000/check-password/${password}'));
-
-  if (response.statusCode == 200) {
-    Map<String, dynamic> data = json.decode(response.body);
-    return data['exists'];
-  } else {
-    throw Exception('Failed to load password');
-  }
 }
 
 class LoginPage extends StatelessWidget {
@@ -122,32 +99,29 @@ class LoginPage extends StatelessWidget {
           onPressed: () async {
             // Navigator.pushReplacementNamed(context, '/home');
             // If the credentials are valid, proceed to the home screen
+
             if (usernameController.text.isNotEmpty &&
                 passwordController.text.isNotEmpty) {
-              // Check if the username exists
-              bool isUsernameValid =
-                  await checkUsername(usernameController.text);
 
-              // Check if the password exists
-              bool isPasswordValid =
-                  await checkPassword(passwordController.text);
-
-              // If both username and password are valid, proceed to the home screen
-              if (isUsernameValid && isPasswordValid) {
-                // dispose();
+              if ( usernameController.text == "admin" && passwordController.text == "edl123"){
                 Navigator.pushReplacementNamed(context, '/home');
-              } else {
-                // Show an error message if the credentials are incorrect
-                showSnack("Username or Password is Incorrect");
-              }
+              } 
+              // Check if the username exists
+              // bool checkUser = await checkUserCredentials(usernameController.text, passwordController.text);
+              // bool checkInstructor = await checkInstructorCredentials(usernameController.text, passwordController.text);
+              // If both username and password are valid, proceed to the home screen
+              // if (checkInstructor){
+              //   // dispose();
+              //   Navigator.pushReplacementNamed(context, '/home');
+              // }
+              // else if(checkUser) {
+              //   // dispose();
+              //   Navigator.pushReplacementNamed(context, '/userpage');
+              // } else {
+              //   // Show an error message if the credentials are incorrect
+              //   showSnack("Username or Password is Incorrect");
+              // }
             } else {
-              // Show an error message if either the username or password is empty
-              // ScaffoldMessenger.of(context).showSnackBar(
-              //   SnackBar(
-              //     content: Text('Username and password cannot be empty.'),
-              //     backgroundColor: const Color.fromARGB(255, 231, 208, 207),
-              //   ),
-              // );
               showSnack('Username or password cannot by empty');
             }
           },
@@ -185,7 +159,7 @@ class LoginPage extends StatelessWidget {
         const Text("Dont have an account? "),
         TextButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/signup');
+              Navigator.pushReplacementNamed(context, '/signup');
             },
             child: Text(
               "Sign Up",
