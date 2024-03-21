@@ -7,8 +7,11 @@ import 'dart:convert';
 import 'package:edl_app/issue.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:edl_app/connection.dart';
+import "package:shared_preferences/shared_preferences.dart";
+import 'package:edl_app/deviceprovider.dart';
+import 'package:provider/provider.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -26,7 +29,6 @@ void showSnack(String title) {
 }
 
 class IssuePage extends StatelessWidget {
-
   final String rollNo;
   final String location;
   IssuePage({required this.rollNo, required this.location});
@@ -40,7 +42,6 @@ class IssuePage extends StatelessWidget {
 }
 
 class BleScanner extends StatefulWidget {
-
   final String rollNo;
   final String location;
 
@@ -51,22 +52,80 @@ class BleScanner extends StatefulWidget {
 }
 
 class _BleScannerState extends State<BleScanner> {
-  
   List<BluetoothDevice> devices = [];
   List<String> readValues = [];
   bool check = true;
-  bool isConnected = false;
+  late SharedPreferences _prefs;
+  late bool isConnected = false;
+
+  Future<void> updateDeviceInfo(
+      String deviceId, String username, String locationOfUse) async {
+    final url = Uri.parse('http://192.168.128.222:8000/devices/$deviceId/AFG/');
+
+    Map<String, String> headers = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    Map<String, String> body = {
+      'username': username,
+      'location_of_use': locationOfUse,
+    };
+
+    try {
+      final response = await http.put(
+        url,
+        headers: headers,
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 200) {
+        print('Device information updated successfully');
+      } else {
+        print('Failed to update device information: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    startScanning();
+    _initializeSharedPreferences();
   }
 
+  Future<void> _initializeSharedPreferences() async {
+    await FlutterBluePlus.turnOn();
+    _prefs = await SharedPreferences.getInstance();
+    await _loadCommonVariable();
+    if (isConnected == false) {
+      devices = [];
+      startScanning();
+    }
+    // Call _loadDevices after _prefs is initialized
+  }
+
+  Future<void> _loadCommonVariable() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isConnected =
+          _prefs.getBool('isconnected') ?? false; // Default value if not found
+    });
+  }
+
+  // Method to set the value of the common variable in shared preferences
+  Future<void> _setCommonVariable(bool value) async {
+    setState(() {
+      isConnected = value;
+    });
+    await _prefs.setBool('isconnected', value);
+  }
 
   Future<void> readData(BluetoothDevice device) async {
     bool out = false;
-    List<BluetoothService> services = await device.discoverServices(timeout: 10000);
+    List<BluetoothService> services =
+        await device.discoverServices(timeout: 10000);
     services.forEach((service) async {
       var characteristics = service.characteristics;
       while (!out) {
@@ -75,24 +134,27 @@ class _BleScannerState extends State<BleScanner> {
         for (BluetoothCharacteristic c in characteristics) {
           if (c.properties.read) {
             while (true) {
-            List<int> value = await c.read();
-            if (c.characteristicUuid.toString() ==
-                "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
-              if (String.fromCharCodes(value) != "") {
-                print("went inside");
-                setState(() {
-                  // print()
-                  readValues.add(String.fromCharCodes(value));
-                  print(readValues.length);
-                  out = true;
-                });
-                break;
+              List<int> value = await c.read();
+              if (c.characteristicUuid.toString() ==
+                  "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
+                if (String.fromCharCodes(value) != "") {
+                  print("went inside");
+                  String a = String.fromCharCodes(value);
+                  updateDeviceInfo(a, widget.rollNo, widget.location);
+                  setState(() {
+                    // print()
+                    readValues.add(String.fromCharCodes(value));
+                    print(readValues.length);
+                    out = true;
+                  });
+                  break;
+                }
               }
             }
           }
         }
       }
-    }});
+    });
   }
 
   Future<void> writeData(BluetoothDevice device) async {
@@ -142,6 +204,7 @@ class _BleScannerState extends State<BleScanner> {
         }
       }
     });
+    context.read<DeviceProvider>().setDevices(devices);
   }
 
   void connectReader(BluetoothDevice device) async {
@@ -151,6 +214,7 @@ class _BleScannerState extends State<BleScanner> {
     showSnack("Connected Succesfully");
     setState(() {
       isConnected = !isConnected;
+      _setCommonVariable(isConnected);
     });
   }
 
@@ -160,9 +224,11 @@ class _BleScannerState extends State<BleScanner> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final deviceProvider = Provider.of<DeviceProvider>(context);
+    devices = deviceProvider.devices;
+
     return ScaffoldMessenger(
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
@@ -194,6 +260,7 @@ class _BleScannerState extends State<BleScanner> {
                     devices[0].disconnect();
                     setState(() {
                       isConnected = !isConnected;
+                      _setCommonVariable(isConnected);
                     });
                     showSnack("Disconnected");
                   }
@@ -230,7 +297,6 @@ class _BleScannerState extends State<BleScanner> {
       ),
     );
   }
-
 }
 
 

@@ -9,40 +9,32 @@ import 'package:edl_app/connection.dart';
 import 'package:edl_app/issueVerification.dart';
 import 'package:http/http.dart' as http;
 
-
 final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
 final TextEditingController locationController = TextEditingController();
 
-String startUrl = "http://192.168.43.144:8000";
-
+String startUrl = "http://192.168.128.222:8000";
 
 Future<void> sendOTP(String email) async {
-    try {
-      Map<String, String> headers = {
-      'Content-Type': 'application/json'
-      }; 
-      Map <String, dynamic> data = {"email": email};
-      print(email);
-      final response = await http.post(
-        Uri.parse('${startUrl}/send-otp/'),
-        body: json.encode(data),
-        headers: headers
-      );  
-      if (response.statusCode == 200) {
-        print('OTP sent successfully');
-      } else {
-        print('Failed to send OTP');
-        throw Exception('Failed to send OTP');
-      }
-    } catch (e) {
-      print('Error sending OTP: $e');
-      // setState(() {
-      //   _errorMessage = 'Failed to send OTP';
-      // });
+  try {
+    Map<String, String> headers = {'Content-Type': 'application/json'};
+    Map<String, dynamic> data = {"email": email};
+    print(email);
+    final response = await http.post(Uri.parse('${startUrl}/send-otp/'),
+        body: json.encode(data), headers: headers);
+    if (response.statusCode == 200) {
+      print('OTP sent successfully');
+    } else {
+      print('Failed to send OTP');
+      throw Exception('Failed to send OTP');
     }
+  } catch (e) {
+    print('Error sending OTP: $e');
+    // setState(() {
+    //   _errorMessage = 'Failed to send OTP';
+    // });
   }
-
+}
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyissue =
     GlobalKey<ScaffoldMessengerState>();
@@ -74,7 +66,6 @@ class _Issue extends StatefulWidget {
 }
 
 class _IssueState extends State<_Issue> {
-
   late String _issueReason;
   late String _issueLocation;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -99,7 +90,7 @@ class _IssueState extends State<_Issue> {
         ),
         body: SingleChildScrollView(
           child: SizedBox(
-            height: MediaQuery.of(context).size.height*8/8,
+            height: MediaQuery.of(context).size.height * 8 / 8,
             child: Column(
               children: [
                 SizedBox(height: 20),
@@ -111,94 +102,103 @@ class _IssueState extends State<_Issue> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         SizedBox(height: 20.0),
-                      //   Text(
-                      //     'Reason for Issuing:',
-                      //     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                      //   ),
-                      //   TextFormField(
-                      //     onChanged: (value) {
-                      //       _issueReason = value;
-                      //     },
-                      //     maxLines: 2,
-                      //     decoration: InputDecoration(
-                      //       border: OutlineInputBorder(),
-                      //       hintText: 'Enter Reason',
-                      //     ),
-                      //   validator: (value) {
-                      //   if (value!.isEmpty) {
-                      //     return 'Please enter a reason';
-                      //   }
-                      //   return null;
-                      // },
-                      // ),
-                      SizedBox(height: 20.0),
-                      Row(
-                        children: [
-                          Flexible(
-                            flex: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Location of Use:',
-                                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                                ),
-                                TextFormField(
-                                  controller: locationController,
-                                  onChanged: (value) {
-                                    _issueLocation = value;
-                                  },
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(),
-                                    hintText: 'Enter Location',
+                        //   Text(
+                        //     'Reason for Issuing:',
+                        //     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                        //   ),
+                        //   TextFormField(
+                        //     onChanged: (value) {
+                        //       _issueReason = value;
+                        //     },
+                        //     maxLines: 2,
+                        //     decoration: InputDecoration(
+                        //       border: OutlineInputBorder(),
+                        //       hintText: 'Enter Reason',
+                        //     ),
+                        //   validator: (value) {
+                        //   if (value!.isEmpty) {
+                        //     return 'Please enter a reason';
+                        //   }
+                        //   return null;
+                        // },
+                        // ),
+                        SizedBox(height: 20.0),
+                        Row(
+                          children: [
+                            Flexible(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Location of Use:',
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold),
                                   ),
-                                  validator: (value) {
-                                    if (value!.isEmpty) {
-                                      return 'Please enter a location';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(width: 8), // Add some spacing between the fields
-                          Flexible(
-                            flex: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Roll No:',
-                                  style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                                ),
-                                TextFormField(
-                                  // initialValue: '210070018',
-                                  // enabled: false,
-                                  controller: rollnoController,
-                                  onChanged: (value) {
-                                    _issueLocation = value;
-                                  },
-                                  decoration: InputDecoration(
-                                    hintText: "Enter Roll No.",
-                                    border: OutlineInputBorder(),
+                                  TextFormField(
+                                    controller: locationController,
+                                    onChanged: (value) {
+                                      _issueLocation = value;
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(),
+                                      hintText: 'Enter Location',
+                                    ),
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return 'Please enter a location';
+                                      }
+                                      return null;
+                                    },
                                   ),
-                                  validator: (value) {
-                                  if (value!.isEmpty) {
-                                    return 'Please enter a Roll No.';
-                                  }
-                                  return null;
-                                  },
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20,),
-                      Text(
+                            SizedBox(
+                                width:
+                                    8), // Add some spacing between the fields
+                            Flexible(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Roll No:',
+                                    style: TextStyle(
+                                        fontSize: 18.0,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  TextFormField(
+                                    // initialValue: '210070018',
+                                    // enabled: false,
+                                    controller: rollnoController,
+                                    onChanged: (value) {
+                                      _issueLocation = value;
+                                    },
+                                    decoration: InputDecoration(
+                                      hintText: "Enter Roll No.",
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    validator: (value) {
+                                      if (value!.isEmpty) {
+                                        return 'Please enter a Roll No.';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        Text(
                           'LDAP Email ID:',
-                          style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18.0, fontWeight: FontWeight.bold),
                         ),
                         TextFormField(
                           controller: emailController,
@@ -210,13 +210,13 @@ class _IssueState extends State<_Issue> {
                             border: OutlineInputBorder(),
                             hintText: 'Enter LDAP email ID',
                           ),
-                        validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter a reason';
-                        }
-                        return null;
-                      },
-                      ),
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter a reason';
+                            }
+                            return null;
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -235,7 +235,7 @@ class _IssueState extends State<_Issue> {
                 //         print("hello");
                 //       }
                 //     },
-            
+
                 //   child: Text(
                 //     'Issue device',
                 //     style: TextStyle(fontSize: 18),
@@ -246,16 +246,18 @@ class _IssueState extends State<_Issue> {
                   children: [
                     ElevatedButton(
                       onPressed: () {
-                          if (_formKey.currentState!.validate()) {
+                        if (_formKey.currentState!.validate()) {
                           print("Issue with ID Card");
-                          }
+                        }
                       },
                       child: Text(
                         'Issue with ID Card',
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
-                    SizedBox(height: 16), // Add some vertical spacing between the buttons
+                    SizedBox(
+                        height:
+                            16), // Add some vertical spacing between the buttons
                     Text(
                       'or',
                       textAlign: TextAlign.center,
@@ -264,26 +266,28 @@ class _IssueState extends State<_Issue> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 16), // Add some vertical spacing between the buttons and the "or" text
+                    SizedBox(
+                        height:
+                            16), // Add some vertical spacing between the buttons and the "or" text
                     ElevatedButton(
                       onPressed: () {
-                          if (_formKey.currentState!.validate()) {
-                            print("Issue via Email");
-                            sendOTP(emailController.text);
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => IssueOTPVerificationPage(
-                                    email: emailController.text,
-                                    onVerificationSuccess: () {
-                                      // addUser(data);
-                                      print('funciton called');
-                                    },
-                                    rollNo: rollnoController.text,
-                                    location: locationController.text,
-                                  ),
-                                ),
-                              );                 
+                        if (_formKey.currentState!.validate()) {
+                          print("Issue via Email");
+                          sendOTP(emailController.text);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => IssueOTPVerificationPage(
+                                email: emailController.text,
+                                onVerificationSuccess: () {
+                                  // addUser(data);
+                                  print('funciton called');
+                                },
+                                rollNo: rollnoController.text,
+                                location: locationController.text,
+                              ),
+                            ),
+                          );
                         }
                       },
                       child: Text(

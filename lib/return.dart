@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:http/http.dart';
 import 'package:edl_app/connection.dart';
+import "package:shared_preferences/shared_preferences.dart";
+import 'package:edl_app/deviceprovider.dart';
+import 'package:provider/provider.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -39,22 +42,50 @@ class BleScanner extends StatefulWidget {
 }
 
 class _BleScannerState extends State<BleScanner> {
-  
   List<BluetoothDevice> devices = [];
   List<String> readValues = [];
   bool check = true;
-  bool isConnected = false;
+  late SharedPreferences _prefs;
+  late bool isConnected = false;
+  // bool isConnected = false;
 
   @override
   void initState() {
     super.initState();
-    startScanning();
+    _initializeSharedPreferences();
   }
 
+  Future<void> _initializeSharedPreferences() async {
+    await FlutterBluePlus.turnOn();
+    _prefs = await SharedPreferences.getInstance();
+    await _loadCommonVariable();
+    if (isConnected == false) {
+      devices = [];
+      startScanning();
+    }
+    // Call _loadDevices after _prefs is initialized
+  }
+
+  Future<void> _loadCommonVariable() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isConnected =
+          _prefs.getBool('isconnected') ?? false; // Default value if not found
+    });
+  }
+
+  // Method to set the value of the common variable in shared preferences
+  Future<void> _setCommonVariable(bool value) async {
+    setState(() {
+      isConnected = value;
+    });
+    await _prefs.setBool('isconnected', value);
+  }
 
   Future<void> readData(BluetoothDevice device) async {
     bool out = false;
-    List<BluetoothService> services = await device.discoverServices(timeout: 10000);
+    List<BluetoothService> services =
+        await device.discoverServices(timeout: 10000);
     services.forEach((service) async {
       var characteristics = service.characteristics;
       while (!out) {
@@ -63,24 +94,25 @@ class _BleScannerState extends State<BleScanner> {
         for (BluetoothCharacteristic c in characteristics) {
           if (c.properties.read) {
             while (true) {
-            List<int> value = await c.read();
-            if (c.characteristicUuid.toString() ==
-                "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
-              if (String.fromCharCodes(value) != "") {
-                print("went inside");
-                setState(() {
-                  // print()
-                  readValues.add(String.fromCharCodes(value));
-                  print(readValues.length);
-                  out = true;
-                });
-                break;
+              List<int> value = await c.read();
+              if (c.characteristicUuid.toString() ==
+                  "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
+                if (String.fromCharCodes(value) != "") {
+                  print("went inside");
+                  setState(() {
+                    // print()
+                    readValues.add(String.fromCharCodes(value));
+                    print(readValues.length);
+                    out = true;
+                  });
+                  break;
+                }
               }
             }
           }
         }
       }
-    }});
+    });
   }
 
   Future<void> writeData(BluetoothDevice device) async {
@@ -99,6 +131,7 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   void startScanning() async {
+    print("came for scanning==============================>");
     await FlutterBluePlus.startScan();
     FlutterBluePlus.scanResults.listen((results) {
       for (ScanResult result in results) {
@@ -110,12 +143,16 @@ class _BleScannerState extends State<BleScanner> {
                 check) {
               // print("hello");
               devices.add(result.device);
+
               check = false;
             }
           });
         }
       }
     });
+    context.read<DeviceProvider>().setDevices(devices);
+
+    // deviceProvider.setDevices(devices);
   }
 
   void connectReader(BluetoothDevice device) async {
@@ -125,6 +162,7 @@ class _BleScannerState extends State<BleScanner> {
     showSnack("Connected Succesfully");
     setState(() {
       isConnected = !isConnected;
+      _setCommonVariable(isConnected);
     });
   }
 
@@ -134,9 +172,11 @@ class _BleScannerState extends State<BleScanner> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final deviceProvider = Provider.of<DeviceProvider>(context);
+    devices = deviceProvider.devices;
+
     return ScaffoldMessenger(
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
@@ -168,6 +208,7 @@ class _BleScannerState extends State<BleScanner> {
                     devices[0].disconnect();
                     setState(() {
                       isConnected = !isConnected;
+                      _setCommonVariable(isConnected);
                     });
                     showSnack("Disconnected");
                   }
@@ -203,7 +244,6 @@ class _BleScannerState extends State<BleScanner> {
       ),
     );
   }
-
 }
 
 
