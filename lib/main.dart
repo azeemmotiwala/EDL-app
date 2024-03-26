@@ -5,7 +5,7 @@ import 'package:edl_app/signup.dart';
 import 'package:edl_app/userpage.dart';
 import 'package:flutter/material.dart';
 import 'package:edl_app/home.dart';
-// import 'package:edl_app/loading.dart';
+import 'package:edl_app/loading.dart';
 import 'package:edl_app/scan.dart';
 import 'package:edl_app/login.dart';
 import 'package:edl_app/issue.dart';
@@ -16,6 +16,7 @@ import 'package:edl_app/issuePage.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:edl_app/deviceprovider.dart';
+import 'package:edl_app/add.dart';
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -27,10 +28,8 @@ void main() {
         debugShowCheckedModeBanner: false,
         initialRoute: '/home',
         routes: {
-          // '/': (context) => Loading(),
           // '/signup': (context) => SignupPage(),
           '/home': (context) => Home(),
-
           // '/login': (context) => LoginPage(),
           '/scan': (context) => Scan(),
           '/issue': (context) => Issue(),
@@ -38,7 +37,6 @@ void main() {
                 email: "",
                 onVerificationSuccess: () => {},
               ),
-          '/userpage': (context) => UserPage(),
           '/issueVerification': (context) => IssueOTPVerificationPage(
                 email: "",
                 onVerificationSuccess: () => {},
@@ -50,7 +48,7 @@ void main() {
                 location: "",
               ),
           '/return': (context) => Return(),
+          '/add': (context) => Add(),
         },
       )));
-  // minor change
 }

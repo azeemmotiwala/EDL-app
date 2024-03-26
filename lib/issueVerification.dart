@@ -5,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:edl_app/issue.dart';
 
-String startUrl = "http://192.168.128.222:8000";
+String startUrl = "http://192.168.43.144:8000";
 
 class IssueOTPVerificationPage extends StatefulWidget {
   final String email;
   final String rollNo;
   final String location;
-
   final VoidCallback? onVerificationSuccess; // Callback function
 
   IssueOTPVerificationPage(
@@ -29,7 +28,6 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
   String _errorMessage = '';
   bool _loading = false; // New variable to manage loading state
 
-  // Function to send OTP
   Future<void> sendOTP(String email) async {
     try {
       Map<String, String> headers = {'Content-Type': 'application/json'};
@@ -67,12 +65,12 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
       headers: headers,
     );
 
+    try{
     if (response.statusCode == 200) {
       print('OTP verified successfully');
-      // Navigate to the next screen upon successful verification
       setState(() {
         _loading =
-            false; // Set loading to false when the verification is complete
+            false; 
       });
       showDialog(
         context: context,
@@ -99,16 +97,22 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
           );
         },
       );
-      if (widget.onVerificationSuccess != null) {
-        widget.onVerificationSuccess!();
-      }
-      // Navigator.pushReplacementNamed(context, '/login');
+      // if (widget.onVerificationSuccess != null) {
+      //   widget.onVerificationSuccess!();
+      // }
     } else {
       print('Failed to verify OTP');
       setState(() {
-        _loading =
-            false; // Set loading to false when the verification is complete
+        _loading = false; // Set loading to false when the verification is complete
         _errorMessage = 'Failed to verify OTP';
+      });
+    }
+    }
+    catch(e){
+      print("server error");
+      setState(() {
+        _loading = false; // Set loading to false when the verification is complete
+        _errorMessage = 'Server down';
       });
     }
   }
@@ -149,20 +153,20 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                             fontSize: 15, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 20),
-                      TextField(
+                      TextFormField(
                         controller: _otpController,
                         keyboardType: TextInputType.number,
+                        maxLines: 1,
                         decoration: InputDecoration(
-                          labelText: 'Enter OTP',
                           border: OutlineInputBorder(),
-                          contentPadding:
-                              EdgeInsets.symmetric(horizontal: 16.0),
+                          hintText: 'Enter OTP.',
+                          prefixIcon: Icon(Icons.password),
                         ),
                       ),
                       SizedBox(height: 20),
                       Text(
                         _errorMessage,
-                        style: TextStyle(color: Colors.red, fontSize: 16),
+                        style: TextStyle(color: Colors.blue, fontSize: 16),
                       ),
                       SizedBox(height: 0),
                       Row(
@@ -171,12 +175,11 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                           const Text("Didn't receive OTP?"),
                           TextButton(
                               onPressed: () {
-                                // Navigator.pop(context);
                                 sendOTP(widget.email);
                               },
                               child: const Text(
                                 "Resend",
-                                style: TextStyle(color: Colors.red),
+                                style: TextStyle(color: Colors.blue),
                               ))
                         ],
                       ),
@@ -202,7 +205,7 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.symmetric(
                               horizontal: 32.0, vertical: 16.0),
-                          primary: Colors.red[700],
+                          primary: Colors.blue,
                         ),
                       ),
                       Row(
@@ -215,7 +218,7 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                               },
                               child: const Text(
                                 "Issue",
-                                style: TextStyle(color: Colors.red),
+                                style: TextStyle(color: Colors.blue),
                               ))
                         ],
                       )

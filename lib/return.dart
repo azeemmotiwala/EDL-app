@@ -4,13 +4,17 @@
 
 import 'dart:convert';
 
+import 'package:edl_app/verification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
+
+String startUrl = "http://192.168.43.144:8000";
+
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -82,6 +86,42 @@ class _BleScannerState extends State<BleScanner> {
     await _prefs.setBool('isconnected', value);
   }
 
+  Future<void> updateDeviceInfo(String deviceId, String username, String locationOfUse) async {
+
+    readValues = [];
+    final url = Uri.parse('${startUrl}/devices/$deviceId/');
+
+    Map<String, String> headers = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    };
+
+    Map<String, String> body = {
+      "device_id": "",
+      "device_name": "",
+      'username': username,
+      'location_of_use': locationOfUse,
+    };
+
+    try {
+      final response = await http.put(
+        url,
+        headers: headers,
+        body: json.encode(body),
+      );
+
+      if (response.statusCode == 200) {
+        showSnack("Return Successful");
+        print('Device information updated successfully');
+      } else {
+        showSnack("Fail to return, try again");
+        print('Failed to update device information: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Error: $e');
+    }
+  }
+
   Future<void> readData(BluetoothDevice device) async {
     bool out = false;
     List<BluetoothService> services =
@@ -102,6 +142,7 @@ class _BleScannerState extends State<BleScanner> {
                   setState(() {
                     // print()
                     readValues.add(String.fromCharCodes(value));
+                    updateDeviceInfo(readValues[0], "", "");
                     print(readValues.length);
                     out = true;
                   });
@@ -180,20 +221,15 @@ class _BleScannerState extends State<BleScanner> {
     return ScaffoldMessenger(
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
-        appBar: AppBar(
-          flexibleSpace: Container(
-            height: MediaQuery.of(context).size.height / 8,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],
-              ),
-            ),
-          ),
-          centerTitle: true,
-          title: Text("Return Page"),
-          elevation: 0.0,
+      appBar: AppBar(
+        backgroundColor: Colors.blue, // Set background color to blue
+        title: Text(
+          'Return Page',
+          style: TextStyle(color: Colors.white), // Set text color to white
         ),
-        body: Column(
+        centerTitle: true,
+      ),                      
+      body: Column(
           children: [
             ConnectionWidget(
               isConnected: isConnected,
@@ -248,19 +284,6 @@ class _BleScannerState extends State<BleScanner> {
 
 
 
-
-// void writeCharacteristic(
-//     BluetoothDevice device, characteristicId, List<int> data) async {
-//   List<BluetoothService> services = await device.discoverServices();
-//   for (BluetoothService service in services) {
-//     for (BluetoothCharacteristic characteristic in service.characteristics) {
-//       if (characteristic.uuid == characteristicId) {
-//         await characteristic.write(data);
-//         print('Data written successfully.');
-//       }
-//     }
-//   }
-// }
 
 // 28:CD:C1:08:97:9C
 // 6e400003-b5a3-f393-e0a9-e50e24dcca9e

@@ -12,8 +12,9 @@ import 'package:http/http.dart' as http;
 final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
 final TextEditingController locationController = TextEditingController();
+final TextEditingController phoneController = TextEditingController();
 
-String startUrl = "http://192.168.128.222:8000";
+String startUrl = "http://192.168.43.144:8000";
 
 Future<void> sendOTP(String email) async {
   try {
@@ -66,8 +67,7 @@ class _Issue extends StatefulWidget {
 }
 
 class _IssueState extends State<_Issue> {
-  late String _issueReason;
-  late String _issueLocation;
+
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
@@ -76,24 +76,20 @@ class _IssueState extends State<_Issue> {
       // key: scaffoldMessengerKeyissue,
       child: Scaffold(
         appBar: AppBar(
-          flexibleSpace: Container(
-            height: MediaQuery.of(context).size.height / 8,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],
-              ),
-            ),
+          backgroundColor: Colors.blue, // Set background color to blue
+          title: Text(
+            'Issuing Page',
+            style: TextStyle(color: Colors.white), // Set text color to white
           ),
           centerTitle: true,
-          title: Text("Issuing Page"),
-          elevation: 0.0,
         ),
         body: SingleChildScrollView(
           child: SizedBox(
-            height: MediaQuery.of(context).size.height * 8 / 8,
+            height: MediaQuery.of(context).size.height,
             child: Column(
-              children: [
-                SizedBox(height: 20),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                SizedBox(height: 20.0),
                 Padding(
                   padding: EdgeInsets.all(20.0),
                   child: Form(
@@ -102,206 +98,135 @@ class _IssueState extends State<_Issue> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         SizedBox(height: 20.0),
-                        //   Text(
-                        //     'Reason for Issuing:',
-                        //     style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
-                        //   ),
-                        //   TextFormField(
-                        //     onChanged: (value) {
-                        //       _issueReason = value;
-                        //     },
-                        //     maxLines: 2,
-                        //     decoration: InputDecoration(
-                        //       border: OutlineInputBorder(),
-                        //       hintText: 'Enter Reason',
-                        //     ),
-                        //   validator: (value) {
-                        //   if (value!.isEmpty) {
-                        //     return 'Please enter a reason';
-                        //   }
-                        //   return null;
-                        // },
-                        // ),
-                        SizedBox(height: 20.0),
-                        Row(
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Flexible(
-                              flex: 1,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Location of Use:',
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  TextFormField(
-                                    controller: locationController,
-                                    onChanged: (value) {
-                                      _issueLocation = value;
-                                    },
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(),
-                                      hintText: 'Enter Location',
-                                    ),
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return 'Please enter a location';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
+                            Text(
+                              'Location of Use:',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
-                            SizedBox(
-                                width:
-                                    8), // Add some spacing between the fields
-                            Flexible(
-                              flex: 1,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Roll No:',
-                                    style: TextStyle(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  TextFormField(
-                                    // initialValue: '210070018',
-                                    // enabled: false,
-                                    controller: rollnoController,
-                                    onChanged: (value) {
-                                      _issueLocation = value;
-                                    },
-                                    decoration: InputDecoration(
-                                      hintText: "Enter Roll No.",
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator: (value) {
-                                      if (value!.isEmpty) {
-                                        return 'Please enter a Roll No.';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
+                            TextFormField(
+                              controller: locationController,
+                              validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please enter location';
+                              }
+                              },
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(),
+                                hintText: 'Enter Location',
+                                prefixIcon: Icon(Icons.location_on),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(
-                          height: 20,
+                        SizedBox(height: 20.0),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Roll No:',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextFormField(
+                              controller: rollnoController,
+                              validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please enter Roll No';
+                              }
+                              },                      
+                              decoration: InputDecoration(
+                                hintText: "Enter Roll No.",
+                                border: OutlineInputBorder(),
+                                prefixIcon: Icon(Icons.person),
+                              ),
+                            ),
+                          ],
                         ),
+                        SizedBox(height: 20.0),
                         Text(
                           'LDAP Email ID:',
                           style: TextStyle(
-                              fontSize: 18.0, fontWeight: FontWeight.bold),
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         TextFormField(
                           controller: emailController,
-                          onChanged: (value) {
-                            _issueReason = value;
-                          },
+                          validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter email ID';
+                          }
+                          },                  
                           maxLines: 1,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Enter LDAP email ID',
+                            prefixIcon: Icon(Icons.email),
                           ),
+                        ),
+                        SizedBox(height: 20.0),
+                        Text(
+                          'Phone No:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextFormField(
+                          controller: phoneController,
+                          keyboardType: TextInputType.number,
                           validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter a reason';
-                            }
-                            return null;
-                          },
+                              if (value!.isEmpty) {
+                                return 'Please enter phone No.';
+                              }
+                          },                  
+                          maxLines: 1,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Phone No.',
+                            prefixIcon: Icon(Icons.phone),
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
-                // ElevatedButton(
-                //   // onPressed: isConnected
-                //   //     ? () async {
-                //   //         // Simulating a Bluetooth device
-                //   //         await writeData(devices[0]);
-                //   //         await readData(devices[0]);
-                //   //       }
-                //   //     : null,
-                //     onPressed: () {
-                //       if (_formKey.currentState!.validate()) {
-                //         // _submitIssue();
-                //         print("hello");
-                //       }
-                //     },
-
-                //   child: Text(
-                //     'Issue device',
-                //     style: TextStyle(fontSize: 18),
-                //   ),
-                // ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          print("Issue with ID Card");
-                        }
-                      },
-                      child: Text(
-                        'Issue with ID Card',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                    SizedBox(
-                        height:
-                            16), // Add some vertical spacing between the buttons
-                    Text(
-                      'or',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(
-                        height:
-                            16), // Add some vertical spacing between the buttons and the "or" text
-                    ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          print("Issue via Email");
-                          sendOTP(emailController.text);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => IssueOTPVerificationPage(
-                                email: emailController.text,
-                                onVerificationSuccess: () {
-                                  // addUser(data);
-                                  print('funciton called');
-                                },
-                                rollNo: rollnoController.text,
-                                location: locationController.text,
-                              ),
-                            ),
-                          );
-                        }
-                      },
-                      child: Text(
-                        'Issue via Email',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                    ),
-                  ],
+                SizedBox(height: 16.0),
+                CardButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      print("Issue via Email");
+                      sendOTP(emailController.text);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => IssueOTPVerificationPage(
+                            email: emailController.text,
+                            onVerificationSuccess: () {
+                              print('Function called');
+                            },
+                            rollNo: rollnoController.text,
+                            location: locationController.text,
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                  text: 'Issue via Email',
+                  icon: Icons.email,
                 ),
               ],
             ),
           ),
         ),
-      ),
+      ),            
     );
   }
 
@@ -310,26 +235,98 @@ class _IssueState extends State<_Issue> {
     FlutterBluePlus.stopScan();
     super.dispose();
   }
+
+}
+
+class CardButton extends StatelessWidget {
+
+  final VoidCallback onPressed;
+  final String text;
+  final IconData icon;
+
+  const CardButton({
+    required this.onPressed,
+    required this.text,
+    required this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Card(
+        margin: EdgeInsets.all(10),
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Row(
+            children: [
+              Icon(
+                icon,
+                size: 40,
+                color: Colors.blue,
+              ),
+              SizedBox(width: 20),
+              Text(
+                text,
+                style: TextStyle(fontSize: 18),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 
 
 
-// void writeCharacteristic(
-//     BluetoothDevice device, characteristicId, List<int> data) async {
-//   List<BluetoothService> services = await device.discoverServices();
-//   for (BluetoothService service in services) {
-//     for (BluetoothCharacteristic characteristic in service.characteristics) {
-//       if (characteristic.uuid == characteristicId) {
-//         await characteristic.write(data);
-//         print('Data written successfully.');
-//       }
-//     }
+// class CardButton extends StatelessWidget {
+//   final VoidCallback onPressed;
+//   final String text;
+//   final IconData icon;
+
+//   const CardButton({
+//     required this.onPressed,
+//     required this.text,
+//     required this.icon,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Card(
+//       elevation: 4,
+//       margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+//       child: ListTile(
+//         onTap: onPressed,
+//         title: Text(text),
+//         leading: Icon(
+//           icon,
+//           color: Colors.blue, // Set icon color to blue
+//         ),
+//         trailing: Icon(Icons.arrow_forward_ios),
+//       ),
+//     );
 //   }
 // }
 
-// 28:CD:C1:08:97:9C
-// 6e400003-b5a3-f393-e0a9-e50e24dcca9e
 
-//write
-//  serviceUuid: 6e400001-b5a3-f393-e0a9-e50e24dcca9e, secondaryServiceUuid: null, characteristicUuid: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+// // void writeCharacteristic(
+// //     BluetoothDevice device, characteristicId, List<int> data) async {
+// //   List<BluetoothService> services = await device.discoverServices();
+// //   for (BluetoothService service in services) {
+// //     for (BluetoothCharacteristic characteristic in service.characteristics) {
+// //       if (characteristic.uuid == characteristicId) {
+// //         await characteristic.write(data);
+// //         print('Data written successfully.');
+// //       }
+// //     }
+// //   }
+// // }
+
+// // 28:CD:C1:08:97:9C
+// // 6e400003-b5a3-f393-e0a9-e50e24dcca9e
+
+// //write
+// //  serviceUuid: 6e400001-b5a3-f393-e0a9-e50e24dcca9e, secondaryServiceUuid: null, characteristicUuid: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+

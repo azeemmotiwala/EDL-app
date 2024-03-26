@@ -13,6 +13,9 @@ import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
 
+String startUrl = "http://192.168.43.144:8000";
+
+
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
 
@@ -58,36 +61,43 @@ class _BleScannerState extends State<BleScanner> {
   late SharedPreferences _prefs;
   late bool isConnected = false;
 
-  Future<void> updateDeviceInfo(
-      String deviceId, String username, String locationOfUse) async {
-    final url = Uri.parse('http://192.168.128.222:8000/devices/$deviceId/AFG/');
+Future<void> updateDeviceInfo(String deviceId, String username, String locationOfUse) async {
 
-    Map<String, String> headers = {
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-    };
 
-    Map<String, String> body = {
-      'username': username,
-      'location_of_use': locationOfUse,
-    };
+  readValues = [];
+  final url = Uri.parse('${startUrl}/devices/$deviceId/');
 
-    try {
-      final response = await http.put(
-        url,
-        headers: headers,
-        body: json.encode(body),
-      );
+  Map<String, String> headers = {
+    'Content-type': 'application/json',
+    'Accept': 'application/json',
+  };
 
-      if (response.statusCode == 200) {
-        print('Device information updated successfully');
-      } else {
-        print('Failed to update device information: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      print('Error: $e');
+  Map<String, String> body = {
+    "device_id": "",
+    "device_name": "",
+    'username': username,
+    'location_of_use': locationOfUse,
+  };
+
+  try {
+    final response = await http.put(
+      url,
+      headers: headers,
+      body: json.encode(body),
+    );
+
+    if (response.statusCode == 200) {
+      showSnack("Issued Successflluy");
+      print('Device information updated successfully');
+    } 
+    else {
+      showSnack("Failed to issue, try again");
+      print('Failed to update device information: ${response.reasonPhrase}');
     }
+  } catch (e) {
+    print('Error: $e');
   }
+}
 
   @override
   void initState() {
@@ -124,27 +134,20 @@ class _BleScannerState extends State<BleScanner> {
 
   Future<void> readData(BluetoothDevice device) async {
     bool out = false;
-    List<BluetoothService> services =
-        await device.discoverServices(timeout: 10000);
+    List<BluetoothService> services = await device.discoverServices(timeout: 10000);
     services.forEach((service) async {
       var characteristics = service.characteristics;
       while (!out) {
-        // print("hello");
         await Future.delayed(const Duration(seconds: 1));
         for (BluetoothCharacteristic c in characteristics) {
           if (c.properties.read) {
             while (true) {
               List<int> value = await c.read();
-              if (c.characteristicUuid.toString() ==
-                  "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
+              if (c.characteristicUuid.toString() == "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
                 if (String.fromCharCodes(value) != "") {
-                  print("went inside");
-                  String a = String.fromCharCodes(value);
-                  updateDeviceInfo(a, widget.rollNo, widget.location);
                   setState(() {
-                    // print()
                     readValues.add(String.fromCharCodes(value));
-                    print(readValues.length);
+                    updateDeviceInfo(readValues[0], widget.rollNo, widget.location);
                     out = true;
                   });
                   break;
@@ -158,12 +161,10 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   Future<void> writeData(BluetoothDevice device) async {
-    // List<String> tempReadValues = [];
 
     final mtu = await device.mtu.first;
     print(mtu);
     // await device.requestMtu(512);
-
     // await device.requestMtu(100);
     List<BluetoothService> services = await device.discoverServices();
     services.forEach((service) async {
@@ -191,12 +192,9 @@ class _BleScannerState extends State<BleScanner> {
     FlutterBluePlus.scanResults.listen((results) {
       for (ScanResult result in results) {
         if (!devices.contains(result.device)) {
-          // print("hello");
-          // print("gll");
           setState(() {
             if (result.device.remoteId.toString() == "28:CD:C1:08:97:9C" &&
                 check) {
-              // print("hello");
               devices.add(result.device);
               check = false;
             }
@@ -208,8 +206,6 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   void connectReader(BluetoothDevice device) async {
-    // Perform connection logic here
-    // For simplicity, we toggle the connection state
     await device.connect();
     showSnack("Connected Succesfully");
     setState(() {
@@ -233,68 +229,64 @@ class _BleScannerState extends State<BleScanner> {
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
         appBar: AppBar(
-          flexibleSpace: Container(
-            height: MediaQuery.of(context).size.height / 8,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],
-              ),
-            ),
+          backgroundColor: Colors.blue, // Set background color to blue
+          title: Text(
+            'Issuing Page',
+            style: TextStyle(color: Colors.white), // Set text color to white
           ),
           centerTitle: true,
-          title: Text("Issue Page"),
-          elevation: 0.0,
-        ),
+        ),                      
         body: Column(
-          children: [
-            ConnectionWidget(
-              isConnected: isConnected,
-              onConnectPressed: () {
-                if (devices.length == 0) {
-                  print("not connected");
-                  showSnack("Try again");
-                } else {
-                  if (isConnected == false) {
-                    connectReader(devices[0]);
-                  } else {
-                    devices[0].disconnect();
-                    setState(() {
-                      isConnected = !isConnected;
-                      _setCommonVariable(isConnected);
-                    });
-                    showSnack("Disconnected");
-                  }
-                }
-              },
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isConnected
-                  ? () async {
-                      // Simulating a Bluetooth device
-                      await writeData(devices[0]);
-                      await readData(devices[0]);
+            children: [
+              ConnectionWidget(
+                isConnected: isConnected,
+                onConnectPressed: () {
+                  if (devices.length == 0) {
+                    print("not connected");
+                    showSnack("Try again");
+                  } 
+                  else {
+                    if (isConnected == false) {
+                      connectReader(devices[0]);
+                    } 
+                    else {
+                      devices[0].disconnect();
+                      setState(() {
+                        isConnected = !isConnected;
+                        _setCommonVariable(isConnected);
+                      });
+                      showSnack("Disconnected");
                     }
-                  : null,
-              child: Text(
-                'Issue Device',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: readValues.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(readValues[index]),
-                  );
+                  }
                 },
               ),
-            ),
-          ],
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: isConnected
+                    ? () async {
+                        await writeData(devices[0]);
+                        await readData(devices[0]);
+                      }
+                    : null,
+                child: Text(
+                  'Issue Device',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: readValues.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(readValues[index]),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
     );
   }
 }

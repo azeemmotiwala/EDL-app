@@ -13,18 +13,6 @@ class ConnectionWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(16),
-      // decoration: BoxDecoration(
-      //         gradient: LinearGradient(
-      //   colors: [Color(0xFFFACCCC), Color(0xFFF6EFE9)],
-      // ),
-
-      //   gradient: LinearGradient(
-      //     colors: [
-      //       Color.fromARGB(255, 192, 157, 157),
-      //       Color.fromARGB(255, 229, 226, 223)
-      //     ],
-      //   ),
-      // ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -44,6 +32,7 @@ class ConnectionWidget extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              
               ElevatedButton(
                 onPressed: onConnectPressed,
                 child: Text(
@@ -58,4 +47,5 @@ class ConnectionWidget extends StatelessWidget {
     );
   }
 }
+
 
