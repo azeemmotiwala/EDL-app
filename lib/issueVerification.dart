@@ -11,13 +11,22 @@ class IssueOTPVerificationPage extends StatefulWidget {
   final String email;
   final String rollNo;
   final String location;
+  final String phone_no;
+  final String name;
+  final DateTime issue_date;
+  final DateTime return_date;
   final VoidCallback? onVerificationSuccess; // Callback function
 
   IssueOTPVerificationPage(
       {required this.email,
       required this.onVerificationSuccess,
       required this.rollNo,
-      required this.location});
+      required this.location,
+      required this.name,
+      required this.issue_date,
+      required this.return_date,
+      required this.phone_no
+      });
 
   @override
   _OTPVerificationPageState createState() => _OTPVerificationPageState();
@@ -87,6 +96,10 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                       builder: (context) => IssuePage(
                         rollNo: widget.rollNo,
                         location: widget.location,
+                        phone_no: widget.phone_no,
+                        name: widget.name,
+                        issue_date: widget.issue_date,
+                        return_date: widget.return_date
                       ),
                     ),
                   );

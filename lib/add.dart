@@ -71,8 +71,12 @@ Future<void> addDevice(String deviceId, String deviceName) async {
   Map<String, String> body = {
     "device_id": deviceId,
     "device_name": deviceName,
-    'username': "",
-    'location_of_use': "",
+  'username': "",
+  'phone_no': "",
+  'name': "",
+  'issue_date': DateTime.now().toIso8601String(), // Convert DateTime to ISO 8601 string
+  'return_date': DateTime.now().toIso8601String(), // Convert DateTime to ISO 8601 string
+  'location_of_use': "",
   };
 
   try {

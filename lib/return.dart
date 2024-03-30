@@ -89,7 +89,7 @@ class _BleScannerState extends State<BleScanner> {
   Future<void> updateDeviceInfo(String deviceId, String username, String locationOfUse) async {
 
     readValues = [];
-    final url = Uri.parse('${startUrl}/devices/$deviceId/');
+    final url = Uri.parse('${startUrl}/device/$deviceId/');
 
     Map<String, String> headers = {
       'Content-type': 'application/json',
@@ -99,8 +99,12 @@ class _BleScannerState extends State<BleScanner> {
     Map<String, String> body = {
       "device_id": "",
       "device_name": "",
-      'username': username,
-      'location_of_use': locationOfUse,
+  'username': "",
+  'phone_no': "",
+  'name': "",
+  'issue_date': DateTime.now().toIso8601String(), // Convert DateTime to ISO 8601 string
+  'return_date': DateTime.now().toIso8601String(), // Convert DateTime to ISO 8601 string
+  'location_of_use': "",
     };
 
     try {

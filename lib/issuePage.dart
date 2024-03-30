@@ -34,12 +34,17 @@ void showSnack(String title) {
 class IssuePage extends StatelessWidget {
   final String rollNo;
   final String location;
-  IssuePage({required this.rollNo, required this.location});
+    final String phone_no;
+  final String name;
+  final DateTime issue_date;
+  final DateTime return_date;
+
+  IssuePage({required this.rollNo, required this.location, required this.phone_no, required this.name, required this.issue_date, required this.return_date});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: BleScanner(rollNo: rollNo, location: location),
+      home: BleScanner(rollNo: rollNo, location: location, phone_no: phone_no, name: name, issue_date: issue_date, return_date: return_date,),
     );
   }
 }
@@ -47,8 +52,13 @@ class IssuePage extends StatelessWidget {
 class BleScanner extends StatefulWidget {
   final String rollNo;
   final String location;
+    final String phone_no;
+  final String name;
+  final DateTime issue_date;
+  final DateTime return_date;
 
-  BleScanner({required this.rollNo, required this.location});
+
+  BleScanner({required this.rollNo, required this.location, required this.phone_no, required this.name, required this.issue_date, required this.return_date});
 
   @override
   _BleScannerState createState() => _BleScannerState();
@@ -61,7 +71,7 @@ class _BleScannerState extends State<BleScanner> {
   late SharedPreferences _prefs;
   late bool isConnected = false;
 
-Future<void> updateDeviceInfo(String deviceId, String username, String locationOfUse) async {
+Future<void> updateDeviceInfo(String deviceId, String username, String locationOfUse, String phone_no, String name, DateTime issue_date, DateTime return_date )async {
 
 
   readValues = [];
@@ -76,9 +86,15 @@ Future<void> updateDeviceInfo(String deviceId, String username, String locationO
     "device_id": "",
     "device_name": "",
     'username': username,
+    'phone_no': phone_no,
+    'name': name,
+    'issue_date': issue_date.toIso8601String(), // Convert DateTime to ISO 8601 string
+    'return_date': return_date.toIso8601String(), // Convert DateTime to ISO 8601 string
     'location_of_use': locationOfUse,
   };
-
+  print(body);
+  print(deviceId);
+  print('========================================================================================================================================');
   try {
     final response = await http.put(
       url,
@@ -147,7 +163,7 @@ Future<void> updateDeviceInfo(String deviceId, String username, String locationO
                 if (String.fromCharCodes(value) != "") {
                   setState(() {
                     readValues.add(String.fromCharCodes(value));
-                    updateDeviceInfo(readValues[0], widget.rollNo, widget.location);
+                    updateDeviceInfo(readValues[0], widget.rollNo, widget.location, widget.phone_no, widget.name, widget.issue_date, widget.return_date);
                     out = true;
                   });
                   break;
@@ -182,6 +198,11 @@ Future<void> updateDeviceInfo(String deviceId, String username, String locationO
           final command3 = "${widget.location}";
           final convertedCommand3 = AsciiEncoder().convert(command3);
           await c.write(convertedCommand3);
+          await Future.delayed(const Duration(seconds: 1));
+          final command4 = "${widget.issue_date.day}/${widget.issue_date.month}/${widget.issue_date.year}";
+          final convertedCommand4 = AsciiEncoder().convert(command4);
+          await c.write(convertedCommand4);
+
         }
       }
     });

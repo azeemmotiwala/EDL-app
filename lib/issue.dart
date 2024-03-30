@@ -3,6 +3,7 @@
 // // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:convert';
+import 'package:edl_app/return.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:edl_app/connection.dart';
@@ -13,6 +14,10 @@ final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
 final TextEditingController locationController = TextEditingController();
 final TextEditingController phoneController = TextEditingController();
+final TextEditingController nameController= TextEditingController();
+final TextEditingController returnDateController = TextEditingController();
+
+
 
 String startUrl = "http://192.168.43.144:8000";
 
@@ -70,6 +75,29 @@ class _IssueState extends State<_Issue> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
+
+  DateTime selectedIssueDate = DateTime.now();
+  DateTime selectedReturnDate = DateTime.now().add(Duration(days: 365 * 3)); // Default return date is current date + 3 years
+
+Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
+  final DateTime? picked = await showDatePicker(
+    context: context,
+    initialDate: isIssueDate ? selectedIssueDate : selectedReturnDate,
+    firstDate: DateTime.now(),
+    lastDate: DateTime.now().add(Duration(days: 365 * 3)), // Last date is current date + 3 years
+  );
+  if (picked != null) {
+    setState(() {
+      if (isIssueDate) {
+        selectedIssueDate = picked;
+      } else {
+        selectedReturnDate = picked;
+        // Set the value of the return date text field
+        returnDateController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+      }
+    });
+  }
+}
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -85,7 +113,7 @@ class _IssueState extends State<_Issue> {
         ),
         body: SingleChildScrollView(
           child: SizedBox(
-            height: MediaQuery.of(context).size.height,
+            height: MediaQuery.of(context).size.height*1.5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -173,6 +201,28 @@ class _IssueState extends State<_Issue> {
                         ),
                         SizedBox(height: 20.0),
                         Text(
+                          'Name:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextFormField(
+                          controller: nameController,
+                          validator: (value) {
+                          if (value!.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          },                  
+                          maxLines: 1,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter your name',
+                            prefixIcon: Icon(Icons.person),
+                          ),
+                        ),
+                        SizedBox(height: 20.0),
+                        Text(
                           'Phone No:',
                           style: TextStyle(
                             fontSize: 18.0,
@@ -194,6 +244,54 @@ class _IssueState extends State<_Issue> {
                             prefixIcon: Icon(Icons.phone),
                           ),
                         ),
+SizedBox(height: 20.0),
+                        Text(
+                          'Issue Date:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextFormField(
+                          enabled: false, // Disable editing
+                          initialValue:
+                              '${selectedIssueDate.year}-${selectedIssueDate.month.toString().padLeft(2, '0')}-${selectedIssueDate.day.toString().padLeft(2, '0')}',
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Issue Date',
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Return Date:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextFormField(
+                                  enabled: false,
+                                  controller: returnDateController,
+                                  decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Select Return Date',
+                                  prefixIcon: Icon(Icons.calendar_today),
+                                  ),
+                                  ),
+
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.date_range),
+                              onPressed: () { _selectDate(context, false);
+                                      print(selectedReturnDate);
+ }
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20),
                       ],
                     ),
                   ),
@@ -214,6 +312,10 @@ class _IssueState extends State<_Issue> {
                             },
                             rollNo: rollnoController.text,
                             location: locationController.text,
+                            name: nameController.text,
+                            issue_date: selectedIssueDate,
+                            return_date: selectedReturnDate,
+                            phone_no: phoneController.text
                           ),
                         ),
                       );
