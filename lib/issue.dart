@@ -14,10 +14,8 @@ final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
 final TextEditingController locationController = TextEditingController();
 final TextEditingController phoneController = TextEditingController();
-final TextEditingController nameController= TextEditingController();
+final TextEditingController nameController = TextEditingController();
 final TextEditingController returnDateController = TextEditingController();
-
-
 
 String startUrl = "http://192.168.43.144:8000";
 
@@ -72,32 +70,34 @@ class _Issue extends StatefulWidget {
 }
 
 class _IssueState extends State<_Issue> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-
   DateTime selectedIssueDate = DateTime.now();
-  DateTime selectedReturnDate = DateTime.now().add(Duration(days: 365 * 3)); // Default return date is current date + 3 years
+  DateTime selectedReturnDate = DateTime.now().add(
+      Duration(days: 365 * 3)); // Default return date is current date + 3 years
 
-Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: isIssueDate ? selectedIssueDate : selectedReturnDate,
-    firstDate: DateTime.now(),
-    lastDate: DateTime.now().add(Duration(days: 365 * 3)), // Last date is current date + 3 years
-  );
-  if (picked != null) {
-    setState(() {
-      if (isIssueDate) {
-        selectedIssueDate = picked;
-      } else {
-        selectedReturnDate = picked;
-        // Set the value of the return date text field
-        returnDateController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-      }
-    });
+  Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isIssueDate ? selectedIssueDate : selectedReturnDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now()
+          .add(Duration(days: 365 * 3)), // Last date is current date + 3 years
+    );
+    if (picked != null) {
+      setState(() {
+        if (isIssueDate) {
+          selectedIssueDate = picked;
+        } else {
+          selectedReturnDate = picked;
+          // Set the value of the return date text field
+          returnDateController.text =
+              '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+        }
+      });
+    }
   }
-}
+
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
@@ -113,7 +113,7 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
         ),
         body: SingleChildScrollView(
           child: SizedBox(
-            height: MediaQuery.of(context).size.height*1.5,
+            height: MediaQuery.of(context).size.height * 1.5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -139,9 +139,9 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             TextFormField(
                               controller: locationController,
                               validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter location';
-                              }
+                                if (value!.isEmpty) {
+                                  return 'Please enter location';
+                                }
                               },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
@@ -165,10 +165,10 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             TextFormField(
                               controller: rollnoController,
                               validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter Roll No';
-                              }
-                              },                      
+                                if (value!.isEmpty) {
+                                  return 'Please enter Roll No';
+                                }
+                              },
                               decoration: InputDecoration(
                                 hintText: "Enter Roll No.",
                                 border: OutlineInputBorder(),
@@ -188,10 +188,10 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                         TextFormField(
                           controller: emailController,
                           validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please enter email ID';
-                          }
-                          },                  
+                            if (value!.isEmpty) {
+                              return 'Please enter email ID';
+                            }
+                          },
                           maxLines: 1,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -210,10 +210,10 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                         TextFormField(
                           controller: nameController,
                           validator: (value) {
-                          if (value!.isEmpty) {
-                            return 'Please enter your name';
-                          }
-                          },                  
+                            if (value!.isEmpty) {
+                              return 'Please enter your name';
+                            }
+                          },
                           maxLines: 1,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -233,10 +233,10 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                           controller: phoneController,
                           keyboardType: TextInputType.number,
                           validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter phone No.';
-                              }
-                          },                  
+                            if (value!.isEmpty) {
+                              return 'Please enter phone No.';
+                            }
+                          },
                           maxLines: 1,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -244,7 +244,7 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             prefixIcon: Icon(Icons.phone),
                           ),
                         ),
-SizedBox(height: 20.0),
+                        SizedBox(height: 20.0),
                         Text(
                           'Issue Date:',
                           style: TextStyle(
@@ -273,22 +273,21 @@ SizedBox(height: 20.0),
                           children: [
                             Expanded(
                               child: TextFormField(
-                                  enabled: false,
-                                  controller: returnDateController,
-                                  decoration: InputDecoration(
+                                enabled: false,
+                                controller: returnDateController,
+                                decoration: InputDecoration(
                                   border: OutlineInputBorder(),
                                   hintText: 'Select Return Date',
                                   prefixIcon: Icon(Icons.calendar_today),
-                                  ),
-                                  ),
-
+                                ),
+                              ),
                             ),
                             IconButton(
-                              icon: Icon(Icons.date_range),
-                              onPressed: () { _selectDate(context, false);
-                                      print(selectedReturnDate);
- }
-                            ),
+                                icon: Icon(Icons.date_range),
+                                onPressed: () {
+                                  _selectDate(context, false);
+                                  print(selectedReturnDate);
+                                }),
                           ],
                         ),
                         SizedBox(height: 20),
@@ -299,13 +298,13 @@ SizedBox(height: 20.0),
                 SizedBox(height: 16.0),
                 CardButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      print("Issue via Email");
-                      sendOTP(emailController.text);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => IssueOTPVerificationPage(
+                    // if (_formKey.currentState!.validate()) {
+                    print("Issue via Email");
+                    sendOTP(emailController.text);
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => IssueOTPVerificationPage(
                             email: emailController.text,
                             onVerificationSuccess: () {
                               print('Function called');
@@ -315,11 +314,10 @@ SizedBox(height: 20.0),
                             name: nameController.text,
                             issue_date: selectedIssueDate,
                             return_date: selectedReturnDate,
-                            phone_no: phoneController.text
-                          ),
-                        ),
-                      );
-                    }
+                            phone_no: phoneController.text),
+                      ),
+                    );
+                    // }
                   },
                   text: 'Issue via Email',
                   icon: Icons.email,
@@ -328,7 +326,7 @@ SizedBox(height: 20.0),
             ),
           ),
         ),
-      ),            
+      ),
     );
   }
 
@@ -337,11 +335,9 @@ SizedBox(height: 20.0),
     FlutterBluePlus.stopScan();
     super.dispose();
   }
-
 }
 
 class CardButton extends StatelessWidget {
-
   final VoidCallback onPressed;
   final String text;
   final IconData icon;

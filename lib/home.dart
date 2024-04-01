@@ -4,45 +4,113 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:provider/provider.dart';
 import 'package:edl_app/deviceprovider.dart';
-import 'package:flutter/services.dart';
+import 'package:edl_app/connection.dart';
+import 'dart:convert';
 
 class Home extends StatefulWidget {
   @override
   State<Home> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
+    GlobalKey<ScaffoldMessengerState>();
+void showSnack(String title) {
+  // print("wwwwwwwwwwwwwwww");
+  final snackbar = SnackBar(
+      content: Text(
+    title,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      fontSize: 15,
+    ),
+  ));
+  scaffoldMessengerKeyscan.currentState?.showSnackBar(snackbar);
+}
 
+class _HomeState extends State<Home> {
   late SharedPreferences _prefs;
   bool isConnected = false;
   List<BluetoothDevice> devices = [];
+  List<String> readValues = [];
+
+  bool check = true;
 
   @override
   void initState() {
+    print("came again");
     super.initState();
-    _initializeSharedPreferences();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final deviceProvider =
           Provider.of<DeviceProvider>(context, listen: false);
       // Inside your method where you get the list of devices
       deviceProvider.setDevices(devices);
     });
+    _initializeSharedPreferences();
+    // ignore: deprecated_member_use
   }
 
   Future<void> _initializeSharedPreferences() async {
+    // ignore: deprecated_member_use
+
     await FlutterBluePlus.turnOn();
     _prefs = await SharedPreferences.getInstance();
     // _loadCommonVariable();
-    _setCommonVariable(false);
-    // Call _loadDevices after _prefs is initialized
+    print("tttttttttttt");
+    await _setCommonVariable(false);
+    await _loadCommonVariable();
+
+    // if (isConnected == false) {
+    // print(isConnected);
+    // print("wewewewe");
+    devices = [];
+    startScanning();
+
+    // }
+  }
+
+  Future<bool> _onPop() async {
+    // Perform actions you want when navigating back to the home page
+    print("Navigated back to home page");
+    await _loadCommonVariable();
+    if (isConnected == false) {
+      print(devices);
+      devices = [];
+      check = true;
+      startScanning();
+    }
+    return true; // Return true to allow popping the route
+  }
+
+  void startScanning() async {
+    await FlutterBluePlus.startScan();
+    FlutterBluePlus.scanResults.listen((results) {
+      for (ScanResult result in results) {
+        if (!devices.contains(result.device)) {
+          print(result);
+          if (result.device.remoteId.toString() == "28:CD:C1:08:97:9C" &&
+              check) {
+            setState(() {
+              devices.add(result.device);
+              check = false;
+              FlutterBluePlus.stopScan();
+
+              // }
+            });
+            break;
+          }
+        }
+      }
+    });
+    context.read<DeviceProvider>().setDevices(devices);
   }
 
   // Method to load the common variable from shared preferences
   Future<void> _loadCommonVariable() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
-      isConnected =
-          _prefs.getBool('isconnected') ?? false; // Default value if not found
+      isConnected = _prefs.getBool('isconnected') ?? false;
+      print(isConnected);
+      print("ininin"); // Default value if not found
     });
   }
 
@@ -54,67 +122,145 @@ class _HomeState extends State<Home> {
     await _prefs.setBool('isconnected', value);
   }
 
+  void connectReader(BluetoothDevice device) async {
+    await device.connect();
+    showSnack("Connected Succesfully");
+    setState(() {
+      isConnected = !isConnected;
+      _setCommonVariable(isConnected);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
-    return Scaffold(
-        appBar: AppBar(
-        backgroundColor: Colors.blue, // Set background color to blue
-        title: Text(
-          'Dashboard',
-          style: TextStyle(color: Colors.white), // Set text color to white
-        ),
-        centerTitle: true,
-      ),      
-      drawer: SideBar(),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(20),
-            child: Image.asset('assets/WEL-logo.png'),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: 5,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    if (index == 0) {
-                      Navigator.pushNamed(context, '/scan');
-                    } else if (index == 1) {
-                      Navigator.pushNamed(context, '/issue');
-                    } else if (index == 2) {
-                      Navigator.pushNamed(context, '/return');
-                    } else if (index == 3) {
-                      Navigator.pushNamed(context, '/add');
-                    } else if (index == 4) {
-                      Navigator.pushNamed(context, '/update');
-                    }
-                    
-                  },
-                  child: Card(
-                    margin: EdgeInsets.all(10),
-                    child: Padding(
-                      padding: EdgeInsets.all(10),
-                      child: Row(
-                        children: [
-                          _buildIcon(index),
-                          SizedBox(width: 20),
-                          Text(
-                            _getTitle(index),
-                            style: TextStyle(fontSize: 18),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+    final deviceProvider = Provider.of<DeviceProvider>(context);
+    devices = deviceProvider.devices;
+    return ScaffoldMessenger(
+        key: scaffoldMessengerKeyscan,
+        child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.blue, // Set background color to blue
+            title: Text(
+              'Dashboard',
+              style: TextStyle(color: Colors.white), // Set text color to white
             ),
+            centerTitle: true,
           ),
-        ],
-      ),
-    );
+          drawer: SideBar(),
+          body: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Image.asset('assets/WEL-logo.png'),
+              ),
+              ConnectionWidget(
+                isConnected: isConnected,
+                onConnectPressed: () {
+                  print(isConnected);
+                  if (devices.length == 0) {
+                    print("not connected");
+                    showSnack("Try again");
+                  } else {
+                    if (isConnected == false) {
+                      connectReader(devices[0]);
+                    } else {
+                      devices[0].disconnect();
+                      setState(() {
+                        isConnected = !isConnected;
+                        _setCommonVariable(isConnected);
+                        devices = [];
+                        startScanning();
+                      });
+                      showSnack("Disconnected");
+                    }
+                  }
+                },
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: 5,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        if (index == 0) {
+                          if (isConnected == true) {
+                            // ignore: deprecated_member_use
+                            // Navigator.popAndPushNamed(context, '/scan');
+                            Navigator.of(context)
+                                .pushNamed('/scan')
+                                .then((value) {
+                              print(devices);
+                              _onPop();
+                            });
+                          } else {
+                            showSnack("Not Connected");
+                          }
+                        } else if (index == 1) {
+                          if (isConnected == true) {
+                            // Navigator.pushNamed(context, '/issue');
+                            Navigator.of(context)
+                                .pushNamed('/issue')
+                                .then((value) {
+                              print(devices);
+                              _onPop();
+                            });
+                          } else {
+                            showSnack("Not Connected");
+                          }
+                        } else if (index == 2) {
+                          if (isConnected == true) {
+                            // Navigator.pushNamed(context, '/return');
+                            Navigator.of(context)
+                                .pushNamed('/return')
+                                .then((value) {
+                              _onPop();
+                            });
+                          } else {
+                            showSnack("Not Connected");
+                          }
+                        } else if (index == 3) {
+                          if (isConnected == true) {
+                            // Navigator.pushNamed(context, '/add');
+                            Navigator.of(context)
+                                .pushNamed('/add')
+                                .then((value) {
+                              _onPop();
+                            });
+                          } else {
+                            showSnack("Not Connected");
+                          }
+                        } else if (index == 4) {
+                          // Navigator.pushNamed(context, '/update');
+                          Navigator.of(context)
+                              .pushNamed('/update')
+                              .then((value) {
+                            _onPop();
+                          });
+                        }
+                      },
+                      child: Card(
+                        margin: EdgeInsets.all(10),
+                        child: Padding(
+                          padding: EdgeInsets.all(10),
+                          child: Row(
+                            children: [
+                              _buildIcon(index),
+                              SizedBox(width: 20),
+                              Text(
+                                _getTitle(index),
+                                style: TextStyle(fontSize: 18),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ));
   }
 
   IconData _getIcon(int index) {

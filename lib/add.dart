@@ -19,7 +19,6 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
 
 final TextEditingController devicenameController = TextEditingController();
 
-
 void showSnack(String title) {
   final snackbar = SnackBar(
       content: Text(
@@ -33,70 +32,67 @@ void showSnack(String title) {
 }
 
 class Add extends StatelessWidget {
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: BleScanner(),
     );
   }
-
 }
 
 class BleScanner extends StatefulWidget {
-
   @override
   _BleScannerState createState() => _BleScannerState();
 }
 
 class _BleScannerState extends State<BleScanner> {
-  
   List<BluetoothDevice> devices = [];
   List<String> readValues = [];
   bool check = true;
   late SharedPreferences _prefs;
   late bool isConnected = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool out = false;
 
-Future<void> addDevice(String deviceId, String deviceName) async {
+  Future<void> addDevice(String deviceId, String deviceName) async {
+    readValues = [];
+    final url = Uri.parse('${startUrl}/devices/');
 
-  readValues = [];
-  final url = Uri.parse('${startUrl}/devices/');
+    Map<String, String> headers = {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+    };
 
-  Map<String, String> headers = {
-    'Content-type': 'application/json',
-    'Accept': 'application/json',
-  };
+    Map<String, String> body = {
+      "device_id": deviceId,
+      "device_name": deviceName,
+      'username': "",
+      'phone_no': "",
+      'name': "",
+      'issue_date': DateTime.now()
+          .toIso8601String(), // Convert DateTime to ISO 8601 string
+      'return_date': DateTime.now()
+          .toIso8601String(), // Convert DateTime to ISO 8601 string
+      'location_of_use': "",
+    };
 
-  Map<String, String> body = {
-    "device_id": deviceId,
-    "device_name": deviceName,
-  'username': "",
-  'phone_no': "",
-  'name': "",
-  'issue_date': DateTime.now().toIso8601String(), // Convert DateTime to ISO 8601 string
-  'return_date': DateTime.now().toIso8601String(), // Convert DateTime to ISO 8601 string
-  'location_of_use': "",
-  };
-
-  try {
-    final response = await http.post(
-      url,
-      headers: headers,
-      body: json.encode(body),
-    );
-    if (response.statusCode == 200) {
-      print('Device information added successfully');
-      showSnack("Device Added Successfully");
-    } 
-    else {
-      print('Failed to add device information: ${response.reasonPhrase}');
-      showSnack("Failed to Add, try again");
+    try {
+      final response = await http.post(
+        url,
+        headers: headers,
+        body: json.encode(body),
+      );
+      if (response.statusCode == 200) {
+        print('Device information added successfully');
+        showSnack("Device Added Successfully");
+      } else {
+        print('Failed to add device information: ${response.reasonPhrase}');
+        showSnack("Failed to Add, try again");
+      }
+    } catch (e) {
+      print('Error: $e');
     }
-  } catch (e) {
-    print('Error: $e');
   }
-}
 
   @override
   void initState() {
@@ -108,10 +104,10 @@ Future<void> addDevice(String deviceId, String deviceName) async {
     await FlutterBluePlus.turnOn();
     _prefs = await SharedPreferences.getInstance();
     await _loadCommonVariable();
-    if (isConnected == false) {
-      devices = [];
-      startScanning();
-    }
+    // if (isConnected == false) {
+    //   devices = [];
+    //   startScanning();
+    // }
     // Call _loadDevices after _prefs is initialized
   }
 
@@ -131,47 +127,81 @@ Future<void> addDevice(String deviceId, String deviceName) async {
     await _prefs.setBool('isconnected', value);
   }
 
-  Future<void> writeData(BluetoothDevice device) async {
-    List<BluetoothService> services = await device.discoverServices();
-    services.forEach((service) async {
-      var characteristics = service.characteristics;
-      for (BluetoothCharacteristic c in characteristics) {
-        if (c.properties.write) {
-          final command = "add\r";
-          final convertedCommand = AsciiEncoder().convert(command);
-          await c.write(convertedCommand);
-        }
-      }
-    });
-  }
-
-
   Future<void> readData(BluetoothDevice device) async {
-    bool out = false;
-    List<BluetoothService> services = await device.discoverServices(timeout: 10000);
-    services.forEach((service) async {
-      var characteristics = service.characteristics;
-      while (!out) {
-        await Future.delayed(const Duration(seconds: 1));
-        for (BluetoothCharacteristic c in characteristics) {
-          if (c.properties.read) {
-            while (true) {
-              List<int> value = await c.read();
-              if (c.characteristicUuid.toString() == "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
-                if (String.fromCharCodes(value) != "") {
-                  setState(() {
-                    readValues.add(String.fromCharCodes(value));
-                    addDevice(readValues[0], devicenameController.text);
-                    out = true;
-                  });
-                  break;
+    try {
+      List<BluetoothService> services =
+          await device.discoverServices(timeout: 10000);
+      services.forEach((service) async {
+        var characteristics = service.characteristics;
+        outerLoop:
+        while (!out) {
+          // print("hello");
+          await Future.delayed(const Duration(seconds: 1));
+          for (BluetoothCharacteristic c in characteristics) {
+            if (c.properties.read) {
+              while (!out) {
+                try {
+                  List<int> value = await c.read();
+                  if (c.characteristicUuid.toString() ==
+                      "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
+                    if (String.fromCharCodes(value) != "") {
+                      print("went inside");
+                      setState(() {
+                        readValues.add(String.fromCharCodes(value));
+                        out = true;
+                      });
+                      out = true;
+                      break outerLoop;
+                    }
+                  }
+                } catch (err) {
+                  print("errrrrrrrrrrrr");
+                  // Handle the error here
+                  showSnack("Device disconnected, connect again!");
+                  isConnected = false;
+                  _setCommonVariable(false);
+                  devices = [];
+                  context.read<DeviceProvider>().setDevices(devices);
+                  out = true;
+                  break outerLoop;
                 }
               }
             }
           }
         }
+      });
+    } catch (error) {
+      print("errrrrrrrrrrrr");
+      // Handle the error here
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
+    }
+  }
+
+  Future<void> writeData(BluetoothDevice device, String s) async {
+    try {
+      List<BluetoothService> services = await device.discoverServices();
+      for (BluetoothService service in services) {
+        for (BluetoothCharacteristic c in service.characteristics) {
+          if (c.properties.write) {
+            final command = s;
+            final convertedCommand = AsciiEncoder().convert(command);
+            await c.write(convertedCommand);
+          }
+        }
       }
-    });
+    } catch (error) {
+      print("errrrrrrrrrrrr");
+      // Handle the error here
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
+    }
   }
 
   void startScanning() async {
@@ -203,50 +233,50 @@ Future<void> addDevice(String deviceId, String deviceName) async {
 
   @override
   void dispose() {
-    FlutterBluePlus.stopScan();
+    // FlutterBluePlus.stopScan();
+    out = true;
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     final deviceProvider = Provider.of<DeviceProvider>(context);
     devices = deviceProvider.devices;
 
     return ScaffoldMessenger(
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue, // Set background color to blue
-        title: Text(
-          'Adding Device Page',
-          style: TextStyle(color: Colors.white), // Set text color to white
+        appBar: AppBar(
+          backgroundColor: Colors.blue, // Set background color to blue
+          title: Text(
+            'Adding Device Page',
+            style: TextStyle(color: Colors.white), // Set text color to white
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Column(
+        body: Column(
           children: [
-            ConnectionWidget(
-              isConnected: isConnected,
-              onConnectPressed: () {
-                if (devices.length == 0) {
-                  showSnack("Try again");
-                } 
-                else {
-                  if (isConnected == false) {
-                    connectReader(devices[0]);
-                  } 
-                  else {
-                    devices[0].disconnect();
-                    setState(() {
-                      isConnected = !isConnected;
-                      _setCommonVariable(isConnected);
-                    });
-                    showSnack("Disconnected");
-                  }
-                }
-              },
-            ),
+            // ConnectionWidget(
+            //   isConnected: isConnected,
+            //   onConnectPressed: () {
+            //     if (devices.length == 0) {
+            //       showSnack("Try again");
+            //     }
+            //     else {
+            //       if (isConnected == false) {
+            //         connectReader(devices[0]);
+            //       }
+            //       else {
+            //         devices[0].disconnect();
+            //         setState(() {
+            //           isConnected = !isConnected;
+            //           _setCommonVariable(isConnected);
+            //         });
+            //         showSnack("Disconnected");
+            //       }
+            //     }
+            //   },
+            // ),
             SizedBox(height: 20),
             Padding(
               padding: EdgeInsets.all(20.0),
@@ -261,7 +291,7 @@ Future<void> addDevice(String deviceId, String deviceName) async {
                       children: [
                         Text(
                           'Device Name:',
-                            style: TextStyle(
+                          style: TextStyle(
                             fontSize: 18.0,
                             fontWeight: FontWeight.bold,
                           ),
@@ -269,18 +299,18 @@ Future<void> addDevice(String deviceId, String deviceName) async {
                         TextFormField(
                           controller: devicenameController,
                           validator: (value) {
-                        if (value!.isEmpty) {
-                          return 'Please enter device name';
-                        }
-                        },
+                            if (value!.isEmpty) {
+                              return 'Please enter device name';
+                            }
+                          },
                           decoration: InputDecoration(
-                          border: OutlineInputBorder(),
-                          hintText: 'Enter Device Name',
-                          prefixIcon: Icon(Icons.device_hub),
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter Device Name',
+                            prefixIcon: Icon(Icons.device_hub),
                           ),
                         ),
                       ],
-                    ),                
+                    ),
                   ],
                 ),
               ),
@@ -290,8 +320,27 @@ Future<void> addDevice(String deviceId, String deviceName) async {
               onPressed: isConnected
                   ? () async {
                       // Simulating a Bluetooth device
-                      await writeData(devices[0]);
-                      await readData(devices[0]);
+
+                      if (devices.length != 0) {
+                        await writeData(devices[0], "add\r");
+                      } else {
+                        showSnack("Device disconnected, connect again!");
+                        isConnected = false;
+                        _setCommonVariable(false);
+                        devices = [];
+                        context.read<DeviceProvider>().setDevices(devices);
+                      }
+
+                      if (devices.length != 0) {
+                        out = false;
+                        await readData(devices[0]);
+                      } else {
+                        showSnack("Device disconnected, connect again!");
+                        isConnected = false;
+                        _setCommonVariable(false);
+                        devices = [];
+                        context.read<DeviceProvider>().setDevices(devices);
+                      }
                     }
                   : null,
               child: Text(
@@ -316,9 +365,6 @@ Future<void> addDevice(String deviceId, String deviceName) async {
     );
   }
 }
-
-
-
 
 class CardButton extends StatelessWidget {
   final VoidCallback onPressed;

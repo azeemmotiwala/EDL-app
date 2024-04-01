@@ -19,7 +19,7 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
 
 void showSnack(String title) {
   final snackbar = SnackBar(
-    content: Text(
+      content: Text(
     title,
     textAlign: TextAlign.center,
     style: TextStyle(
@@ -49,9 +49,10 @@ class _BleScannerState extends State<BleScanner> {
   bool check = true;
   late SharedPreferences _prefs;
   late bool isConnected = false;
-
+  bool out = false;
   @override
   void initState() {
+    print("aaaaaaaaaaaaaaaaaaaagya");
     super.initState();
     _initializeSharedPreferences();
   }
@@ -59,19 +60,40 @@ class _BleScannerState extends State<BleScanner> {
   Future<void> _initializeSharedPreferences() async {
     await FlutterBluePlus.turnOn();
     _prefs = await SharedPreferences.getInstance();
+    // await _setCommonVariable(true);
     await _loadCommonVariable();
-    if (isConnected == false) {
+
+    if (devices.length != 0) {
+      await writeData(devices[0], "scan\r");
+    } else {
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
       devices = [];
-      startScanning();
+      context.read<DeviceProvider>().setDevices(devices);
     }
+
+    if (devices.length != 0) {
+      await readData(devices[0]);
+    } else {
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
+    }
+    // if (isConnected == false) {
+    //   devices = [];
+    //   startScanning();
+    // }
     // Call _loadDevices after _prefs is initialized
   }
 
   Future<void> _loadCommonVariable() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
-      isConnected =
-          _prefs.getBool('isconnected') ?? false; // Default value if not found
+      isConnected = _prefs.getBool('isconnected') ?? false;
+      print(isConnected); // Default value if not found
     });
   }
 
@@ -84,46 +106,80 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   Future<void> readData(BluetoothDevice device) async {
-    bool out = false;
-    List<BluetoothService> services = await device.discoverServices(timeout: 10000);
-    services.forEach((service) async {
-      var characteristics = service.characteristics;
-      while (!out) {
-        // print("hello");
-        await Future.delayed(const Duration(seconds: 1));
-        for (BluetoothCharacteristic c in characteristics) {
-          if (c.properties.read) {
-            while (true) {
-              List<int> value = await c.read();
-              if (c.characteristicUuid.toString() == "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
-                if (String.fromCharCodes(value) != "") {
-                  print("went inside");
-                  setState(() {
-                    readValues.add(String.fromCharCodes(value));
-                    out = true;
-                  });
-                  break;
+    try {
+      List<BluetoothService> services =
+          await device.discoverServices(timeout: 10000);
+      services.forEach((service) async {
+        var characteristics = service.characteristics;
+        outerLoop:
+        while (!out) {
+          // print("hello");
+          await Future.delayed(const Duration(seconds: 1));
+          for (BluetoothCharacteristic c in characteristics) {
+            if (c.properties.read) {
+              while (!out) {
+                try {
+                  List<int> value = await c.read();
+                  if (c.characteristicUuid.toString() ==
+                      "6e400003-b5a3-f393-e0a9-e50e24dcca9e") {
+                    if (String.fromCharCodes(value) != "") {
+                      print("went inside");
+                      setState(() {
+                        readValues.add(String.fromCharCodes(value));
+                        out = true;
+                      });
+                      out = true;
+                      break outerLoop;
+                    }
+                  }
+                } catch (err) {
+                  print("errrrrrrrrrrrr");
+                  // Handle the error here
+                  showSnack("Device disconnected, connect again!");
+                  isConnected = false;
+                  _setCommonVariable(false);
+                  devices = [];
+                  context.read<DeviceProvider>().setDevices(devices);
+                  out = true;
+                  break outerLoop;
                 }
               }
             }
           }
         }
-      }
-    });
+      });
+    } catch (error) {
+      print("errrrrrrrrrrrr");
+      // Handle the error here
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
+    }
   }
 
-  Future<void> writeData(BluetoothDevice device) async {
-    List<BluetoothService> services = await device.discoverServices();
-    services.forEach((service) async {
-      var characteristics = service.characteristics;
-      for (BluetoothCharacteristic c in characteristics) {
-        if (c.properties.write) {
-          final command = "scan\r";
-          final convertedCommand = AsciiEncoder().convert(command);
-          await c.write(convertedCommand);
+  Future<void> writeData(BluetoothDevice device, String s) async {
+    try {
+      List<BluetoothService> services = await device.discoverServices();
+      for (BluetoothService service in services) {
+        for (BluetoothCharacteristic c in service.characteristics) {
+          if (c.properties.write) {
+            final command = s;
+            final convertedCommand = AsciiEncoder().convert(command);
+            await c.write(convertedCommand);
+          }
         }
       }
-    });
+    } catch (error) {
+      print("errrrrrrrrrrrr");
+      // Handle the error here
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
+    }
   }
 
   void startScanning() async {
@@ -132,11 +188,11 @@ class _BleScannerState extends State<BleScanner> {
       for (ScanResult result in results) {
         if (!devices.contains(result.device)) {
           setState(() {
-            if (result.device.remoteId.toString() == "28:CD:C1:08:97:9C" &&
-                check) {
-              devices.add(result.device);
-              check = false;
-            }
+            // if (result.device.remoteId.toString() == "28:CD:C1:08:97:9C" &&
+            //     check) {
+            devices.add(result.device);
+            check = false;
+            // }
           });
         }
       }
@@ -155,7 +211,10 @@ class _BleScannerState extends State<BleScanner> {
 
   @override
   void dispose() {
-    FlutterBluePlus.stopScan();
+    // FlutterBluePlus.stopScan();
+    // print("disssssssssssssdissssss");
+    out = true;
+    // writeData(devices[0], "stop scan\r");
     super.dispose();
   }
 
@@ -166,51 +225,51 @@ class _BleScannerState extends State<BleScanner> {
     return ScaffoldMessenger(
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.blue, // Set background color to blue
-        title: Text(
-          'Scanning Page',
-          style: TextStyle(color: Colors.white), // Set text color to white
+        appBar: AppBar(
+          backgroundColor: Colors.blue, // Set background color to blue
+          title: Text(
+            'Scanning Page',
+            style: TextStyle(color: Colors.white), // Set text color to white
+          ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: Column(
+        body: Column(
           children: [
-            ConnectionWidget(
-              isConnected: isConnected,
-              onConnectPressed: () {
-                if (devices.length == 0) {
-                  print("not connected");
-                  showSnack("Try again");
-                } 
-                else {
-                  if (isConnected == false) {
-                    connectReader(devices[0]);
-                  } else {
-                    devices[0].disconnect();
-                    setState(() {
-                      isConnected = !isConnected;
-                      _setCommonVariable(isConnected);
-                    });
-                    showSnack("Disconnected");
-                  }
-                }
-              },
-            ),
+            // ConnectionWidget(
+            //   isConnected: isConnected,
+            //   onConnectPressed: () {
+            //     if (devices.length == 0) {
+            //       print("not connected");
+            //       showSnack("Try again");
+            //     }
+            //     else {
+            //       if (isConnected == false) {
+            //         connectReader(devices[0]);
+            //       } else {
+            //         devices[0].disconnect();
+            //         setState(() {
+            //           isConnected = !isConnected;
+            //           _setCommonVariable(isConnected);
+            //         });
+            //         showSnack("Disconnected");
+            //       }
+            //     }
+            //   },
+            // ),
             SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isConnected
-                  ? () async {
-                      await writeData(devices[0]);
-                      await readData(devices[0]);
-                    }
-                  : null,
-              child: Text(
-                'Scan RFID Tag',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
-            SizedBox(height: 20),
+            // ElevatedButton(
+            //   onPressed: isConnected
+            //       ? () async {
+            //           await writeData(devices[0]);
+            //           await readData(devices[0]);
+            //         }
+            //       : null,
+            //   child: Text(
+            //     'Scan RFID Tag',
+            //     style: TextStyle(fontSize: 18),
+            //   ),
+            // ),
+            // SizedBox(height: 20),
             Expanded(
               child: ListView.builder(
                 itemCount: readValues.length,
@@ -227,9 +286,6 @@ class _BleScannerState extends State<BleScanner> {
     );
   }
 }
-
-
-
 
 // void writeCharacteristic(
 //     BluetoothDevice device, characteristicId, List<int> data) async {

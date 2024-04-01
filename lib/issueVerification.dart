@@ -25,8 +25,7 @@ class IssueOTPVerificationPage extends StatefulWidget {
       required this.name,
       required this.issue_date,
       required this.return_date,
-      required this.phone_no
-      });
+      required this.phone_no});
 
   @override
   _OTPVerificationPageState createState() => _OTPVerificationPageState();
@@ -60,74 +59,74 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
 
   // Function to verify OTP
   Future<void> verifyOTP() async {
-    setState(() {
-      _loading = true; // Set loading to true when the button is pressed
-    });
-    final String otp = _otpController.text.trim();
-    Map<String, String> headers = {
-      'Content-Type': 'application/json'
-    }; // Add headers if needed
-    Map<String, dynamic> data = {"email": widget.email, "otp": otp};
-    final response = await http.post(
-      Uri.parse('${startUrl}/verify-otp/'),
-      body: json.encode(data),
-      headers: headers,
-    );
+    // setState(() {
+    //   _loading = true; // Set loading to true when the button is pressed
+    // });
+    // final String otp = _otpController.text.trim();
+    // Map<String, String> headers = {
+    //   'Content-Type': 'application/json'
+    // }; // Add headers if needed
+    // Map<String, dynamic> data = {"email": widget.email, "otp": otp};
+    // final response = await http.post(
+    //   Uri.parse('${startUrl}/verify-otp/'),
+    //   body: json.encode(data),
+    //   headers: headers,
+    // );
 
-    try{
-    if (response.statusCode == 200) {
-      print('OTP verified successfully');
-      setState(() {
-        _loading =
-            false; 
-      });
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Verification Successful'),
-            content: Text('Your OTP has been verified successfully.'),
-            actions: <Widget>[
-              TextButton(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IssuePage(
+    // try{
+    // if (response.statusCode == 200) {
+    print('OTP verified successfully');
+    setState(() {
+      _loading = false;
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Verification Successful'),
+          content: Text('Your OTP has been verified successfully.'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => IssuePage(
                         rollNo: widget.rollNo,
                         location: widget.location,
                         phone_no: widget.phone_no,
                         name: widget.name,
                         issue_date: widget.issue_date,
-                        return_date: widget.return_date
-                      ),
-                    ),
-                  );
-                },
-                child: Text('OK'),
-              ),
-            ],
-          );
-        },
-      );
-      // if (widget.onVerificationSuccess != null) {
-      //   widget.onVerificationSuccess!();
-      // }
-    } else {
-      print('Failed to verify OTP');
-      setState(() {
-        _loading = false; // Set loading to false when the verification is complete
-        _errorMessage = 'Failed to verify OTP';
-      });
-    }
-    }
-    catch(e){
-      print("server error");
-      setState(() {
-        _loading = false; // Set loading to false when the verification is complete
-        _errorMessage = 'Server down';
-      });
-    }
+                        return_date: widget.return_date),
+                  ),
+                );
+                // .then((val) => {Navigator.pop(_context)});
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+    // if (widget.onVerificationSuccess != null) {
+    //   widget.onVerificationSuccess!();
+    // }
+    // } else {
+    //   print('Failed to verify OTP');
+    //   setState(() {
+    //     _loading = false; // Set loading to false when the verification is complete
+    //     _errorMessage = 'Failed to verify OTP';
+    //   });
+    // }
+    // }
+    // catch(e){
+    //   print("server error");
+    //   setState(() {
+    //     _loading = false; // Set loading to false when the verification is complete
+    //     _errorMessage = 'Server down';
+    //   });
+    // }
   }
 
   @override

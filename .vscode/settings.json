@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/Desktop/EDL-app/linux"
+    "cmake.sourceDirectory": "D:/Desktop/EDL-app/linux",
+    "liveServer.settings.port": 5501
 }
