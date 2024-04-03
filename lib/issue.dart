@@ -3,6 +3,7 @@
 // // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:convert';
+import 'package:edl_app/issuePage.dart';
 import 'package:edl_app/return.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -13,6 +14,7 @@ import 'package:http/http.dart' as http;
 final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
 final TextEditingController locationController = TextEditingController();
+final TextEditingController requestController = TextEditingController();
 final TextEditingController phoneController = TextEditingController();
 final TextEditingController nameController = TextEditingController();
 final TextEditingController returnDateController = TextEditingController();
@@ -71,10 +73,29 @@ class _Issue extends StatefulWidget {
 
 class _IssueState extends State<_Issue> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool verified = false;
+
+  String email = "";
+  String rollNo = "";
+  String location = "";
+  String name = "";
+
+  String phone_no = "";
 
   DateTime selectedIssueDate = DateTime.now();
   DateTime selectedReturnDate = DateTime.now().add(
       Duration(days: 365 * 3)); // Default return date is current date + 3 years
+
+  @override
+  void initState() {
+    super.initState();
+    // Clear text fields and reset selected return date when initializing the state
+
+    requestController.clear();
+
+    returnDateController.clear();
+    selectedReturnDate = DateTime.now().add(Duration(days: 365 * 3));
+  }
 
   Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
     final DateTime? picked = await showDatePicker(
@@ -96,6 +117,45 @@ class _IssueState extends State<_Issue> {
         }
       });
     }
+  }
+
+  void validate_requestid(String id) async {
+    setState(() {
+      verified = true;
+      email = "vik@gmail.com";
+
+      rollNo = "210070093";
+      location = "hostel";
+      name = " vikas";
+      phone_no = "8306011719";
+    });
+
+    // final apiUrl = Uri.parse('http://10.59.1.225:8000/requests/$id');
+    // try {
+    //   final response = await http.get(apiUrl);
+    //   if (response.statusCode == 200) {
+    //     List<dynamic> userRequests =
+    //         List<dynamic>.from(json.decode(response.body));
+    //     bool hasRejected = userRequests.contains('rejected');
+    //     bool hasPending = userRequests.contains('pending');
+    //     bool allApproved = !hasPending && !hasRejected;
+    //     if (allApproved == true) {
+    //       verified = true;
+    //     }
+
+    //     return userRequests;
+    //   } else {
+    //     throw Exception('Failed to load user requests');
+    //   }
+    // } catch (error) {
+    //   throw Exception('Failed to connect to the server');
+    // }
+  }
+
+  @override
+  void dispose() {
+    // FlutterBluePlus.stopScan();
+    super.dispose();
   }
 
   @override
@@ -126,214 +186,253 @@ class _IssueState extends State<_Issue> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         SizedBox(height: 20.0),
+
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Location of Use:',
+                              'Request ID:',
                               style: TextStyle(
                                 fontSize: 18.0,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             TextFormField(
-                              controller: locationController,
+                              readOnly: verified,
+                              controller: requestController,
                               validator: (value) {
                                 if (value!.isEmpty) {
-                                  return 'Please enter location';
+                                  return 'Please enter request id';
                                 }
                               },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
-                                hintText: 'Enter Location',
-                                prefixIcon: Icon(Icons.location_on),
+                                hintText: 'Enter Request ID',
+                                prefixIcon: Icon(Icons.format_indent_decrease),
                               ),
                             ),
                           ],
                         ),
-                        SizedBox(height: 20.0),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Roll No:',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            TextFormField(
-                              controller: rollnoController,
-                              validator: (value) {
-                                if (value!.isEmpty) {
-                                  return 'Please enter Roll No';
-                                }
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Enter Roll No.",
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.person),
-                              ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 20.0),
-                        Text(
-                          'LDAP Email ID:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
+
+                        if (verified) SizedBox(height: 20.0),
+                        if (verified)
+                          Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.all(
+                                          16), // Adjust padding as needed
+                                      decoration: BoxDecoration(
+                                        color: Colors.green,
+                                        borderRadius: BorderRadius.circular(
+                                            10), // Adjust border radius as needed
+                                      ),
+                                      child: Text(
+                                        'Request ID Verified',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white, // Text color
+                                        ),
+                                      ),
+                                    ),
+                                    Icon(Icons.check, color: Colors.green),
+                                  ],
+                                )
+                              ]),
+                        if (!verified)
+                          CardButton(
+                            onPressed: () {
+                              // if (_formKey.currentState!.validate()) {
+                              print("Validate Request ID");
+                              validate_requestid(requestController.text);
+                              // }
+                            },
+                            text: 'Verify Request ID',
+                            icon: Icons.email,
                           ),
-                        ),
-                        TextFormField(
-                          controller: emailController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter email ID';
-                            }
-                          },
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter LDAP email ID',
-                            prefixIcon: Icon(Icons.email),
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
-                        Text(
-                          'Name:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          controller: nameController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter your name';
-                            }
-                          },
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter your name',
-                            prefixIcon: Icon(Icons.person),
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
-                        Text(
-                          'Phone No:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          controller: phoneController,
-                          keyboardType: TextInputType.number,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter phone No.';
-                            }
-                          },
-                          maxLines: 1,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Phone No.',
-                            prefixIcon: Icon(Icons.phone),
-                          ),
-                        ),
-                        SizedBox(height: 20.0),
-                        Text(
-                          'Issue Date:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          enabled: false, // Disable editing
-                          initialValue:
-                              '${selectedIssueDate.year}-${selectedIssueDate.month.toString().padLeft(2, '0')}-${selectedIssueDate.day.toString().padLeft(2, '0')}',
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Issue Date',
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Return Date:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: TextFormField(
-                                enabled: false,
-                                controller: returnDateController,
+                        // SizedBox(height: 20.0),
+                        // Column(
+                        //   crossAxisAlignment: CrossAxisAlignment.start,
+                        //   children: [
+                        //     Text(
+                        //       'Roll No:',
+                        //       style: TextStyle(
+                        //         fontSize: 18.0,
+                        //         fontWeight: FontWeight.bold,
+                        //       ),
+                        //     ),
+                        //     TextFormField(
+                        //       controller: rollnoController,
+                        //       validator: (value) {
+                        //         if (value!.isEmpty) {
+                        //           return 'Please enter Roll No';
+                        //         }
+                        //       },
+                        //       decoration: InputDecoration(
+                        //         hintText: "Enter Roll No.",
+                        //         border: OutlineInputBorder(),
+                        //         prefixIcon: Icon(Icons.person),
+                        //       ),
+                        //     ),
+                        //   ],
+                        // ),
+                        // SizedBox(height: 20.0),
+                        // Text(
+                        //   'LDAP Email ID:',
+                        //   style: TextStyle(
+                        //     fontSize: 18.0,
+                        //     fontWeight: FontWeight.bold,
+                        //   ),
+                        // ),
+                        // TextFormField(
+                        //   controller: emailController,
+                        //   validator: (value) {
+                        //     if (value!.isEmpty) {
+                        //       return 'Please enter email ID';
+                        //     }
+                        //   },
+                        //   maxLines: 1,
+                        //   decoration: InputDecoration(
+                        //     border: OutlineInputBorder(),
+                        //     hintText: 'Enter LDAP email ID',
+                        //     prefixIcon: Icon(Icons.email),
+                        //   ),
+                        // ),
+                        // SizedBox(height: 20.0),
+                        // Text(
+                        //   'Name:',
+                        //   style: TextStyle(
+                        //     fontSize: 18.0,
+                        //     fontWeight: FontWeight.bold,
+                        //   ),
+                        // ),
+                        // TextFormField(
+                        //   controller: nameController,
+                        //   validator: (value) {
+                        //     if (value!.isEmpty) {
+                        //       return 'Please enter your name';
+                        //     }
+                        //   },
+                        //   maxLines: 1,
+                        //   decoration: InputDecoration(
+                        //     border: OutlineInputBorder(),
+                        //     hintText: 'Enter your name',
+                        //     prefixIcon: Icon(Icons.person),
+                        //   ),
+                        // ),
+                        // SizedBox(height: 20.0),
+                        // Text(
+                        //   'Phone No:',
+                        //   style: TextStyle(
+                        //     fontSize: 18.0,
+                        //     fontWeight: FontWeight.bold,
+                        //   ),
+                        // ),
+                        // TextFormField(
+                        //   controller: phoneController,
+                        //   keyboardType: TextInputType.number,
+                        //   validator: (value) {
+                        //     if (value!.isEmpty) {
+                        //       return 'Please enter phone No.';
+                        //     }
+                        //   },
+                        //   maxLines: 1,
+                        //   decoration: InputDecoration(
+                        //     border: OutlineInputBorder(),
+                        //     hintText: 'Phone No.',
+                        //     prefixIcon: Icon(Icons.phone),
+                        //   ),
+                        // ),
+                        if (verified)
+                          Column(
+                            children: [
+                              SizedBox(height: 20.0),
+                              if (verified)
+                                Text(
+                                  'Issue Date:',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              TextFormField(
+                                enabled: false, // Disable editing
+                                initialValue:
+                                    '${selectedIssueDate.year}-${selectedIssueDate.month.toString().padLeft(2, '0')}-${selectedIssueDate.day.toString().padLeft(2, '0')}',
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(),
-                                  hintText: 'Select Return Date',
-                                  prefixIcon: Icon(Icons.calendar_today),
+                                  hintText: 'Issue Date',
                                 ),
                               ),
-                            ),
-                            IconButton(
-                                icon: Icon(Icons.date_range),
+                              SizedBox(height: 20),
+                              Text(
+                                'Return Date:',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: TextFormField(
+                                      enabled: false,
+                                      controller: returnDateController,
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(),
+                                        hintText: 'Select Return Date',
+                                        prefixIcon: Icon(Icons.calendar_today),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                      icon: Icon(Icons.date_range),
+                                      onPressed: () {
+                                        _selectDate(context, false);
+                                        print(selectedReturnDate);
+                                      }),
+                                ],
+                              ),
+                              SizedBox(height: 20),
+                              CardButton(
                                 onPressed: () {
-                                  _selectDate(context, false);
-                                  print(selectedReturnDate);
-                                }),
-                          ],
-                        ),
-                        SizedBox(height: 20),
+                                  // if (_formKey.currentState!.validate()) {
+                                  // print("Issue via Email");
+                                  // sendOTP(emailController.text);
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => IssuePage(
+                                          rollNo: rollNo,
+                                          location: location,
+                                          name: name,
+                                          issue_date: selectedIssueDate,
+                                          return_date: selectedReturnDate,
+                                          phone_no: phone_no,
+                                        ),
+                                      ));
+                                  // }
+                                },
+                                text: 'Issue Device',
+                                icon: Icons.email,
+                              ),
+                            ],
+                          )
                       ],
                     ),
                   ),
                 ),
                 SizedBox(height: 16.0),
-                CardButton(
-                  onPressed: () {
-                    // if (_formKey.currentState!.validate()) {
-                    print("Issue via Email");
-                    sendOTP(emailController.text);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => IssueOTPVerificationPage(
-                            email: emailController.text,
-                            onVerificationSuccess: () {
-                              print('Function called');
-                            },
-                            rollNo: rollnoController.text,
-                            location: locationController.text,
-                            name: nameController.text,
-                            issue_date: selectedIssueDate,
-                            return_date: selectedReturnDate,
-                            phone_no: phoneController.text),
-                      ),
-                    );
-                    // }
-                  },
-                  text: 'Issue via Email',
-                  icon: Icons.email,
-                ),
               ],
             ),
           ),
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    FlutterBluePlus.stopScan();
-    super.dispose();
   }
 }
 
@@ -376,9 +475,6 @@ class CardButton extends StatelessWidget {
   }
 }
 
-
-
-
 // class CardButton extends StatelessWidget {
 //   final VoidCallback onPressed;
 //   final String text;
@@ -408,7 +504,6 @@ class CardButton extends StatelessWidget {
 //   }
 // }
 
-
 // // void writeCharacteristic(
 // //     BluetoothDevice device, characteristicId, List<int> data) async {
 // //   List<BluetoothService> services = await device.discoverServices();
@@ -427,4 +522,3 @@ class CardButton extends StatelessWidget {
 
 // //write
 // //  serviceUuid: 6e400001-b5a3-f393-e0a9-e50e24dcca9e, secondaryServiceUuid: null, characteristicUuid: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
-

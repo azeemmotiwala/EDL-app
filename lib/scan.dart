@@ -56,7 +56,10 @@ class _BleScannerState extends State<BleScanner> {
   // readValues.add("");
   @override
   void initState() {
-    readValues.add("210070093 Vikas Kumar 2024-04-01 Hostel - 6");
+    // readValues.add("210070093, Hostel - 6, 2024-04-01");
+    readValues.add("210070058");
+    readValues.add("h 6");
+    readValues.add("2024-12-01");
     print("aaaaaaaaaaaaaaaaaaaagya");
     super.initState();
     _initializeSharedPreferences();
@@ -130,7 +133,7 @@ class _BleScannerState extends State<BleScanner> {
                     if (String.fromCharCodes(value) != "") {
                       print("went inside");
                       setState(() {
-                        readValues.add(String.fromCharCodes(value));
+                        readValues = String.fromCharCodes(value).split(",");
                         showVerify = true;
                         out = true;
                       });
@@ -317,43 +320,72 @@ class _BleScannerState extends State<BleScanner> {
             //   ),
             // ),
             // SizedBox(height: 20),
+            // Expanded(
+            //   child: ListView.builder(
+            //     itemCount: readValues.length,
+            //     itemBuilder: (context, index) {
+            //       return Card(
+            //         elevation: 4, // Add elevation for a shadow effect
+            //         margin: EdgeInsets.symmetric(
+            //             vertical: 8,
+            //             horizontal: 16), // Add margin for spacing between cards
+            //         child: ListTile(
+            //           title: Text(
+            //             readValues[index],
+            //             style: TextStyle(
+            //                 fontSize: 16,
+            //                 fontWeight:
+            //                     FontWeight.bold), // Customize text style
+            //           ),
+            //           leading: CircleAvatar(
+            //             backgroundColor: Colors
+            //                 .blue, // Set background color for the leading icon
+            //             child: Icon(Icons.check,
+            //                 color: Colors
+            //                     .white), // Set icon for the leading widget
+            //           ),
+            //           trailing: isVerified
+            //               ? Icon(Icons.check, color: Colors.green)
+            //               : null, // Show verified icon if isVerified is true
+            //         ),
+            //       );
+            //     },
+            //   ),
+            // ),
             Expanded(
-              child: ListView.builder(
-                itemCount: readValues.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 4, // Add elevation for a shadow effect
-                    margin: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16), // Add margin for spacing between cards
-                    child: ListTile(
-                      title: Text(
-                        readValues[index],
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight:
-                                FontWeight.bold), // Customize text style
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors
-                            .blue, // Set background color for the leading icon
-                        child: Icon(Icons.check,
-                            color: Colors
-                                .white), // Set icon for the leading widget
-                      ),
-                      trailing: isVerified
-                          ? Icon(Icons.check, color: Colors.green)
-                          : null, // Show verified icon if isVerified is true
-                    ),
-                  );
-                },
-              ),
-            ),
+                child: ListView.builder(
+              itemCount: readValues.length, // Number of items
+              itemBuilder: (context, index) {
+                print(readValues);
+                // Use switch case to display different data based on index
+                switch (index) {
+                  case 0:
+                    return buildCard('Roll No', readValues[0]);
+                  case 1:
+                    return buildCard('Location', readValues[1]);
+                  case 2:
+                    return buildCard('Issue Date', readValues[2]);
+
+                  default:
+                    return SizedBox(); // Return an empty SizedBox for safety
+                }
+              },
+            ))
           ],
         ),
       ),
     );
   }
+}
+
+Widget buildCard(String label, String value) {
+  return Card(
+    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+    child: ListTile(
+      title: Text(label),
+      subtitle: Text(value),
+    ),
+  );
 }
 
 // void writeCharacteristic(

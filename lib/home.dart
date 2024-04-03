@@ -8,10 +8,8 @@ import 'package:edl_app/connection.dart';
 import 'dart:convert';
 
 class Home extends StatefulWidget {
-  
   final Map<String, dynamic> userData;
   const Home({Key? key, required this.userData}) : super(key: key);
-
 
   @override
   State<Home> createState() => _HomeState();
@@ -150,7 +148,9 @@ class _HomeState extends State<Home> {
             ),
             centerTitle: true,
           ),
-          drawer: SideBar(userData: widget.userData,),
+          drawer: SideBar(
+            userData: widget.userData,
+          ),
           body: Column(
             children: [
               Padding(
@@ -187,6 +187,7 @@ class _HomeState extends State<Home> {
                     return GestureDetector(
                       onTap: () {
                         if (index == 0) {
+                          print("11111111111111");
                           if (isConnected == false) {
                             // ignore: deprecated_member_use
                             // Navigator.popAndPushNamed(context, '/scan');
@@ -200,7 +201,9 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 1) {
-                          if (isConnected == true) {
+                          if (isConnected == false) {
+                            FlutterBluePlus.stopScan();
+
                             // Navigator.pushNamed(context, '/issue');
                             Navigator.of(context)
                                 .pushNamed('/issue')
@@ -236,7 +239,7 @@ class _HomeState extends State<Home> {
                         } else if (index == 4) {
                           // Navigator.pushNamed(context, '/update');
                           Navigator.of(context)
-                              .pushNamed('/update')
+                              .pushNamed('/discard')
                               .then((value) {
                             _onPop();
                           });
@@ -278,7 +281,7 @@ class _HomeState extends State<Home> {
       case 3:
         return Icons.add;
       case 4:
-        return Icons.update;
+        return Icons.remove;
       default:
         return Icons.error;
     }
@@ -295,7 +298,7 @@ class _HomeState extends State<Home> {
       case 3:
         return 'Add/ Update';
       case 4:
-        return 'Update';
+        return 'Discard';
       default:
         return 'Unknown';
     }

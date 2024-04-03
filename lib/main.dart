@@ -21,6 +21,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:edl_app/deviceprovider.dart';
 import 'package:edl_app/add.dart';
+import 'package:edl_app/discard.dart';
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -30,10 +31,12 @@ void main() {
           primarySwatch: Colors.blue,
         ),
         debugShowCheckedModeBanner: false,
-        initialRoute: '/login',
+        initialRoute: '/home',
         routes: {
           // '/signup': (context) => SignupPage(),
-          '/home': (context) => Home(userData: {},),
+          '/home': (context) => Home(
+                userData: {},
+              ),
           '/login': (context) => LoginPage(),
           '/scan': (context) => Scan(),
           '/issue': (context) => Issue(),
@@ -58,14 +61,20 @@ void main() {
                 phone_no: "",
                 issue_date: DateTime.now(),
                 return_date: DateTime.now(),
-
               ),
-          '/userPage': (context) => UserPage(userData: {},),
+          '/userPage': (context) => UserPage(
+                userData: {},
+              ),
           '/return': (context) => Return(),
           '/add': (context) => Add(),
-          '/request' : (context) => RequestPage(rollNo: "",),
+          '/discard': (context) => Discard(),
+
+          '/request': (context) => RequestPage(
+                rollNo: "",
+              ),
           '/issueUser': (context) => IssueUser(userData: {}),
-          '/verifyDetails': (context) => VerifyDetailsPage(userData: {}, location: "", deviceName: "", facultyEmail: "")
+          '/verifyDetails': (context) => VerifyDetailsPage(
+              userData: {}, location: "", deviceName: "", facultyEmail: "")
         },
       )));
 }
