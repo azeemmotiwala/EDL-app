@@ -8,6 +8,11 @@ import 'package:edl_app/connection.dart';
 import 'dart:convert';
 
 class Home extends StatefulWidget {
+  
+  final Map<String, dynamic> userData;
+  const Home({Key? key, required this.userData}) : super(key: key);
+
+
   @override
   State<Home> createState() => _HomeState();
 }
@@ -15,7 +20,6 @@ class Home extends StatefulWidget {
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
 void showSnack(String title) {
-  // print("wwwwwwwwwwwwwwww");
   final snackbar = SnackBar(
       content: Text(
     title,
@@ -146,7 +150,7 @@ class _HomeState extends State<Home> {
             ),
             centerTitle: true,
           ),
-          drawer: SideBar(),
+          drawer: SideBar(userData: widget.userData,),
           body: Column(
             children: [
               Padding(
