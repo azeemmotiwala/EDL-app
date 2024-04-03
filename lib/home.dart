@@ -183,7 +183,7 @@ class _HomeState extends State<Home> {
                     return GestureDetector(
                       onTap: () {
                         if (index == 0) {
-                          if (isConnected == true) {
+                          if (isConnected == false) {
                             // ignore: deprecated_member_use
                             // Navigator.popAndPushNamed(context, '/scan');
                             Navigator.of(context)
@@ -219,7 +219,7 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 3) {
-                          if (isConnected == true) {
+                          if (isConnected == false) {
                             // Navigator.pushNamed(context, '/add');
                             Navigator.of(context)
                                 .pushNamed('/add')
@@ -289,7 +289,7 @@ class _HomeState extends State<Home> {
       case 2:
         return 'Return';
       case 3:
-        return 'Add';
+        return 'Add/ Update';
       case 4:
         return 'Update';
       default:

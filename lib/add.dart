@@ -18,6 +18,7 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
 
 final TextEditingController devicenameController = TextEditingController();
+final TextEditingController serialnoController = TextEditingController();
 
 void showSnack(String title) {
   final snackbar = SnackBar(
@@ -54,7 +55,8 @@ class _BleScannerState extends State<BleScanner> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool out = false;
 
-  Future<void> addDevice(String deviceId, String deviceName) async {
+  Future<void> addDevice(
+      String deviceId, String deviceName, String serialNo) async {
     readValues = [];
     final url = Uri.parse('${startUrl}/devices/');
 
@@ -65,6 +67,7 @@ class _BleScannerState extends State<BleScanner> {
 
     Map<String, String> body = {
       "device_id": deviceId,
+      "serial_no": serialNo,
       "device_name": deviceName,
       'username': "",
       'phone_no': "",
@@ -148,6 +151,8 @@ class _BleScannerState extends State<BleScanner> {
                       print("went inside");
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
+                        addDevice(readValues[0], devicenameController.text,
+                            serialnoController.text);
                         out = true;
                       });
                       out = true;
@@ -290,6 +295,27 @@ class _BleScannerState extends State<BleScanner> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
+                          'Serial No:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextFormField(
+                          controller: serialnoController,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter device serial no.';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter Serial No',
+                            prefixIcon: Icon(Icons.numbers_outlined),
+                          ),
+                        ),
+                        Text(
                           'Device Name:',
                           style: TextStyle(
                             fontSize: 18.0,
@@ -353,8 +379,27 @@ class _BleScannerState extends State<BleScanner> {
               child: ListView.builder(
                 itemCount: readValues.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(readValues[index]),
+                  return Card(
+                    elevation: 4, // Add elevation for a shadow effect
+                    margin: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 16), // Add margin for spacing between cards
+                    child: ListTile(
+                      title: Text(
+                        readValues[index],
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold), // Customize text style
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors
+                            .blue, // Set background color for the leading icon
+                        child: Icon(Icons.check,
+                            color: Colors
+                                .white), // Set icon for the leading widget
+                      ),
+                    ),
                   );
                 },
               ),

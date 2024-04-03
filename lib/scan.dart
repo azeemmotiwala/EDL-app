@@ -50,8 +50,13 @@ class _BleScannerState extends State<BleScanner> {
   late SharedPreferences _prefs;
   late bool isConnected = false;
   bool out = false;
+  bool showVerify = true;
+
+  bool isVerified = false;
+  // readValues.add("");
   @override
   void initState() {
+    readValues.add("210070093 Vikas Kumar 2024-04-01 Hostel - 6");
     print("aaaaaaaaaaaaaaaaaaaagya");
     super.initState();
     _initializeSharedPreferences();
@@ -63,25 +68,25 @@ class _BleScannerState extends State<BleScanner> {
     // await _setCommonVariable(true);
     await _loadCommonVariable();
 
-    if (devices.length != 0) {
-      await writeData(devices[0], "scan\r");
-    } else {
-      showSnack("Device disconnected, connect again!");
-      isConnected = false;
-      _setCommonVariable(false);
-      devices = [];
-      context.read<DeviceProvider>().setDevices(devices);
-    }
+    // if (devices.length != 0) {
+    //   await writeData(devices[0], "scan\r");
+    // } else {
+    //   showSnack("Device disconnected, connect again!");
+    //   isConnected = false;
+    //   _setCommonVariable(false);
+    //   devices = [];
+    //   context.read<DeviceProvider>().setDevices(devices);
+    // }
 
-    if (devices.length != 0) {
-      await readData(devices[0]);
-    } else {
-      showSnack("Device disconnected, connect again!");
-      isConnected = false;
-      _setCommonVariable(false);
-      devices = [];
-      context.read<DeviceProvider>().setDevices(devices);
-    }
+    // if (devices.length != 0) {
+    //   await readData(devices[0]);
+    // } else {
+    //   showSnack("Device disconnected, connect again!");
+    //   isConnected = false;
+    //   _setCommonVariable(false);
+    //   devices = [];
+    //   context.read<DeviceProvider>().setDevices(devices);
+    // }
     // if (isConnected == false) {
     //   devices = [];
     //   startScanning();
@@ -126,6 +131,7 @@ class _BleScannerState extends State<BleScanner> {
                       print("went inside");
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
+                        showVerify = true;
                         out = true;
                       });
                       out = true;
@@ -222,6 +228,7 @@ class _BleScannerState extends State<BleScanner> {
   Widget build(BuildContext context) {
     final deviceProvider = Provider.of<DeviceProvider>(context);
     devices = deviceProvider.devices;
+
     return ScaffoldMessenger(
       key: scaffoldMessengerKeyscan,
       child: Scaffold(
@@ -235,6 +242,46 @@ class _BleScannerState extends State<BleScanner> {
         ),
         body: Column(
           children: [
+            SizedBox(height: 20),
+
+            if (showVerify)
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    isVerified = true;
+                    showSnack("Verified Successfully");
+                  });
+                  // Call the original onPressed callback
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    if (isVerified)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Verified',
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          Icon(Icons.check, color: Colors.green),
+                        ],
+                      ),
+                    if (!isVerified)
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Verify",
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold),
+                            )
+                          ])
+                  ],
+                ),
+              ),
+
             // ConnectionWidget(
             //   isConnected: isConnected,
             //   onConnectPressed: () {
@@ -274,8 +321,30 @@ class _BleScannerState extends State<BleScanner> {
               child: ListView.builder(
                 itemCount: readValues.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(readValues[index]),
+                  return Card(
+                    elevation: 4, // Add elevation for a shadow effect
+                    margin: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 16), // Add margin for spacing between cards
+                    child: ListTile(
+                      title: Text(
+                        readValues[index],
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold), // Customize text style
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors
+                            .blue, // Set background color for the leading icon
+                        child: Icon(Icons.check,
+                            color: Colors
+                                .white), // Set icon for the leading widget
+                      ),
+                      trailing: isVerified
+                          ? Icon(Icons.check, color: Colors.green)
+                          : null, // Show verified icon if isVerified is true
+                    ),
                   );
                 },
               ),

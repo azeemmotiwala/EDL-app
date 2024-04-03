@@ -387,8 +387,27 @@ class _BleScannerState extends State<BleScanner> {
               child: ListView.builder(
                 itemCount: readValues.length,
                 itemBuilder: (context, index) {
-                  return ListTile(
-                    title: Text(readValues[index]),
+                  return Card(
+                    elevation: 4, // Add elevation for a shadow effect
+                    margin: EdgeInsets.symmetric(
+                        vertical: 8,
+                        horizontal: 16), // Add margin for spacing between cards
+                    child: ListTile(
+                      title: Text(
+                        readValues[index],
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight:
+                                FontWeight.bold), // Customize text style
+                      ),
+                      leading: CircleAvatar(
+                        backgroundColor: Colors
+                            .blue, // Set background color for the leading icon
+                        child: Icon(Icons.check,
+                            color: Colors
+                                .white), // Set icon for the leading widget
+                      ),
+                    ),
                   );
                 },
               ),
