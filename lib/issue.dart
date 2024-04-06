@@ -21,26 +21,26 @@ final TextEditingController returnDateController = TextEditingController();
 
 String startUrl = "http://192.168.43.144:8000";
 
-Future<void> sendOTP(String email) async {
-  try {
-    Map<String, String> headers = {'Content-Type': 'application/json'};
-    Map<String, dynamic> data = {"email": email};
-    print(email);
-    final response = await http.post(Uri.parse('${startUrl}/send-otp/'),
-        body: json.encode(data), headers: headers);
-    if (response.statusCode == 200) {
-      print('OTP sent successfully');
-    } else {
-      print('Failed to send OTP');
-      throw Exception('Failed to send OTP');
-    }
-  } catch (e) {
-    print('Error sending OTP: $e');
-    // setState(() {
-    //   _errorMessage = 'Failed to send OTP';
-    // });
-  }
-}
+// Future<void> sendOTP(String email) async {
+//   try {
+//     Map<String, String> headers = {'Content-Type': 'application/json'};
+//     Map<String, dynamic> data = {"email": email};
+//     print(email);
+//     final response = await http.post(Uri.parse('${startUrl}/send-otp/'),
+//         body: json.encode(data), headers: headers);
+//     if (response.statusCode == 200) {
+//       print('OTP sent successfully');
+//     } else {
+//       print('Failed to send OTP');
+//       throw Exception('Failed to send OTP');
+//     }
+//   } catch (e) {
+//     print('Error sending OTP: $e');
+//     // setState(() {
+//     //   _errorMessage = 'Failed to send OTP';
+//     // });
+//   }
+// }
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyissue =
     GlobalKey<ScaffoldMessengerState>();
@@ -79,7 +79,7 @@ class _IssueState extends State<_Issue> {
   String rollNo = "";
   String location = "";
   String name = "";
-
+  String device = "";
   String phone_no = "";
 
   DateTime selectedIssueDate = DateTime.now();
@@ -90,9 +90,7 @@ class _IssueState extends State<_Issue> {
   void initState() {
     super.initState();
     // Clear text fields and reset selected return date when initializing the state
-
     requestController.clear();
-
     returnDateController.clear();
     selectedReturnDate = DateTime.now().add(Duration(days: 365 * 3));
   }
@@ -118,18 +116,38 @@ class _IssueState extends State<_Issue> {
       });
     }
   }
+void validateRequestId(String id) async {
+  final String apiUrl = 'http://192.168.0.125:8000/requests/${id}';
 
-  void validate_requestid(String id) async {
-    setState(() {
-      verified = true;
-      email = "vik@gmail.com";
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
 
-      rollNo = "210070093";
-      location = "hostel";
-      name = " vikas";
-      phone_no = "8306011719";
-    });
-
+    if (response.statusCode == 200) {
+      // If the server returns a 200 OK response, parse the JSON
+      // and extract the required data
+      final requestData = jsonDecode(response.body);
+      print(requestData);
+      // Setting state with the extracted data
+      setState(() {
+        verified = true;
+        email = requestData[3];
+        rollNo = requestData[2];
+        location = requestData[6];
+        name = requestData[4];
+        phone_no = requestData[5];
+        device = requestData[1];
+      });
+    } else {
+      // If the server returns an error response, throw an exception
+      // throw Exception('Failed to fetch request data');
+      print("e");
+    }
+  } catch (e) {
+    // If an error occurs during the request, throw an exception
+    print(e);
+    // throw Exception('Failed to connect to the server: $e');
+  }
+}
     // final apiUrl = Uri.parse('http://10.59.1.225:8000/requests/$id');
     // try {
     //   final response = await http.get(apiUrl);
@@ -150,7 +168,7 @@ class _IssueState extends State<_Issue> {
     // } catch (error) {
     //   throw Exception('Failed to connect to the server');
     // }
-  }
+  
 
   @override
   void dispose() {
@@ -186,7 +204,6 @@ class _IssueState extends State<_Issue> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         SizedBox(height: 20.0),
-
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -248,107 +265,16 @@ class _IssueState extends State<_Issue> {
                             onPressed: () {
                               // if (_formKey.currentState!.validate()) {
                               print("Validate Request ID");
-                              validate_requestid(requestController.text);
+                              validateRequestId(requestController.text);
                               // }
                             },
                             text: 'Verify Request ID',
                             icon: Icons.email,
                           ),
-                        // SizedBox(height: 20.0),
-                        // Column(
-                        //   crossAxisAlignment: CrossAxisAlignment.start,
-                        //   children: [
-                        //     Text(
-                        //       'Roll No:',
-                        //       style: TextStyle(
-                        //         fontSize: 18.0,
-                        //         fontWeight: FontWeight.bold,
-                        //       ),
-                        //     ),
-                        //     TextFormField(
-                        //       controller: rollnoController,
-                        //       validator: (value) {
-                        //         if (value!.isEmpty) {
-                        //           return 'Please enter Roll No';
-                        //         }
-                        //       },
-                        //       decoration: InputDecoration(
-                        //         hintText: "Enter Roll No.",
-                        //         border: OutlineInputBorder(),
-                        //         prefixIcon: Icon(Icons.person),
-                        //       ),
-                        //     ),
-                        //   ],
-                        // ),
-                        // SizedBox(height: 20.0),
-                        // Text(
-                        //   'LDAP Email ID:',
-                        //   style: TextStyle(
-                        //     fontSize: 18.0,
-                        //     fontWeight: FontWeight.bold,
-                        //   ),
-                        // ),
-                        // TextFormField(
-                        //   controller: emailController,
-                        //   validator: (value) {
-                        //     if (value!.isEmpty) {
-                        //       return 'Please enter email ID';
-                        //     }
-                        //   },
-                        //   maxLines: 1,
-                        //   decoration: InputDecoration(
-                        //     border: OutlineInputBorder(),
-                        //     hintText: 'Enter LDAP email ID',
-                        //     prefixIcon: Icon(Icons.email),
-                        //   ),
-                        // ),
-                        // SizedBox(height: 20.0),
-                        // Text(
-                        //   'Name:',
-                        //   style: TextStyle(
-                        //     fontSize: 18.0,
-                        //     fontWeight: FontWeight.bold,
-                        //   ),
-                        // ),
-                        // TextFormField(
-                        //   controller: nameController,
-                        //   validator: (value) {
-                        //     if (value!.isEmpty) {
-                        //       return 'Please enter your name';
-                        //     }
-                        //   },
-                        //   maxLines: 1,
-                        //   decoration: InputDecoration(
-                        //     border: OutlineInputBorder(),
-                        //     hintText: 'Enter your name',
-                        //     prefixIcon: Icon(Icons.person),
-                        //   ),
-                        // ),
-                        // SizedBox(height: 20.0),
-                        // Text(
-                        //   'Phone No:',
-                        //   style: TextStyle(
-                        //     fontSize: 18.0,
-                        //     fontWeight: FontWeight.bold,
-                        //   ),
-                        // ),
-                        // TextFormField(
-                        //   controller: phoneController,
-                        //   keyboardType: TextInputType.number,
-                        //   validator: (value) {
-                        //     if (value!.isEmpty) {
-                        //       return 'Please enter phone No.';
-                        //     }
-                        //   },
-                        //   maxLines: 1,
-                        //   decoration: InputDecoration(
-                        //     border: OutlineInputBorder(),
-                        //     hintText: 'Phone No.',
-                        //     prefixIcon: Icon(Icons.phone),
-                        //   ),
-                        // ),
+
                         if (verified)
                           Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(height: 20.0),
                               if (verified)
@@ -368,6 +294,22 @@ class _IssueState extends State<_Issue> {
                                   hintText: 'Issue Date',
                                 ),
                               ),
+                              SizedBox(height: 20),
+                              Text(
+                                  'Device Name:',
+                                  style: TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              TextFormField(
+                                enabled: false, // Disable editing
+                                initialValue: device,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  hintText: 'Device Name',
+                                ),
+                              ),                              
                               SizedBox(height: 20),
                               Text(
                                 'Return Date:',
@@ -413,6 +355,7 @@ class _IssueState extends State<_Issue> {
                                           issue_date: selectedIssueDate,
                                           return_date: selectedReturnDate,
                                           phone_no: phone_no,
+                                          device: device,
                                         ),
                                       ));
                                   // }

@@ -72,6 +72,9 @@
 //   }
 // }
 
+import 'package:edl_app/deviceStatus.dart';
+import 'package:edl_app/login.dart';
+import 'package:edl_app/logs.dart'; // Import the LogsPage
 import 'package:edl_app/request.dart';
 import 'package:flutter/material.dart';
 
@@ -120,14 +123,9 @@ class _SideBarState extends State<SideBar> {
             ),
           ),
           ListTile(
-            leading: Icon(Icons.share),
-            title: Text('Share'),
-            onTap: () => null,
-          ),
-          ListTile(
             leading: Icon(Icons.notifications),
             title: Text('Request'),
-            onTap: (){
+            onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -135,28 +133,30 @@ class _SideBarState extends State<SideBar> {
                 ),
               );
             },
-            trailing: ClipOval(
-              child: Container(
-                color: Colors.red,
-                width: 20,
-                height: 20,
-                child: Center(
-                  child: Text(
-                    '8',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              ),
-            ),
           ),
-          Divider(),
-          ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-            onTap: () => null,
+          ListTile( // Add a new ListTile for navigating to the LogsPage
+            leading: Icon(Icons.article),
+            title: Text('Logs'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => LogsPage(rollNo: rollNumber),
+                ),
+              );
+            },
+          ),
+          ListTile( // Add a new ListTile for navigating to the LogsPage
+            leading: Icon(Icons.device_hub),
+            title: Text('Device List'),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DeviceStatusPage(),
+                ),
+              );
+            },
           ),
           Divider(),
           ListTile(

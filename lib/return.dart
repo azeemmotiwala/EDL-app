@@ -57,6 +57,7 @@ class _BleScannerState extends State<BleScanner> {
   void initState() {
     super.initState();
     _initializeSharedPreferences();
+    _returnDevice(DateTime.now(), "348108");
   }
 
   Future<void> _initializeSharedPreferences() async {
@@ -105,45 +106,65 @@ class _BleScannerState extends State<BleScanner> {
     await _prefs.setBool('isconnected', value);
   }
 
-  Future<void> updateDeviceInfo(
-      String deviceId, String username, String locationOfUse) async {
-    readValues = [];
-    final url = Uri.parse('${startUrl}/device/$deviceId/');
+  Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
+  final devicesApiUrl = 'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
 
-    Map<String, String> headers = {
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-    };
+  try {
+    // Update device status
+    final devicesResponse = await http.put(
+      Uri.parse(devicesApiUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(<String, String>{
+        'new_status': newStatus,
+      }),
+    );
 
-    Map<String, String> body = {
-      "device_id": "",
-      "device_name": "",
-      'username': "",
-      'phone_no': "",
-      'name': "",
-      'issue_date': DateTime.now()
-          .toIso8601String(), // Convert DateTime to ISO 8601 string
-      'return_date': DateTime.now()
-          .toIso8601String(), // Convert DateTime to ISO 8601 string
-      'location_of_use': "",
-    };
+    if (devicesResponse.statusCode != 200) {
+      print('Failed to update device status. Devices status code: ${devicesResponse.statusCode}');
+      return;
+    }
+    print('Device status updated successfully');
+  } catch (e) {
+    print('Error updating device status: $e');
+  }
+}
 
+
+  Future<void> _returnDevice(DateTime return_date, String rfidId) async {
+    final apiUrl = Uri.parse('http://192.168.0.125:8000/logs/${rfidId}/return/${return_date.toIso8601String()}');
+    // final returnDate = _returnDateController.text;
     try {
       final response = await http.put(
-        url,
-        headers: headers,
-        body: json.encode(body),
+        apiUrl,
+        // body: {'return_date': return_date.toIso8601String()},
       );
+      if (response.statusCode == 200) { 
+        
+        updateDeviceStatus(rfidId, "Available");
+        _getLogsByRfid(rfidId);
 
-      if (response.statusCode == 200) {
-        showSnack("Return Successful");
-        print('Device information updated successfully');
       } else {
-        showSnack("Fail to return, try again");
-        print('Failed to update device information: ${response.reasonPhrase}');
       }
-    } catch (e) {
-      print('Error: $e');
+    } catch (error) {
+    }
+  }
+
+  Future<void> _getLogsByRfid(String rfidId) async {
+    
+    try {
+      final response = await http.get(Uri.parse('http://192.168.0.125:8000/logs/rfid/$rfidId'));
+      if (response.statusCode == 200) {
+        print(jsonDecode(response.body)['logs']);
+        print("'++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+
+      } else if (response.statusCode == 404) {
+      } else {
+        throw Exception('Failed to fetch logs');
+      }
+    } catch (error) {
+    } finally {
     }
   }
 
@@ -169,6 +190,7 @@ class _BleScannerState extends State<BleScanner> {
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
                         out = true;
+                        _returnDevice(DateTime.now(), readValues[0]);
                       });
                       out = true;
                       break outerLoop;

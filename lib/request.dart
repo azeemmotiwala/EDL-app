@@ -27,17 +27,19 @@ class _RequestPageState extends State<RequestPage> {
   }
 
   Future<List<List<dynamic>>> getUserRequests(String rollNo) async {
-    final apiUrl = Uri.parse('http://10.59.1.225:8000/requests/$rollNo');
+    final apiUrl = Uri.parse('http://192.168.0.125:8000/get-requests/${rollNo}/');
     try {
       final response = await http.get(apiUrl);
       if (response.statusCode == 200) {
         List<List<dynamic>> userRequests =
             List<List<dynamic>>.from(json.decode(response.body));
+        print(userRequests);
         return userRequests;
       } else {
         throw Exception('Failed to load user requests');
       }
     } catch (error) {
+      print(error);
       throw Exception('Failed to connect to the server');
     }
   }
@@ -81,7 +83,7 @@ class _RequestPageState extends State<RequestPage> {
               request[1], // Index 1 represents the device name
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: Text(request[0]), // Index 6 represents the location of use
+            subtitle: Text(request[0].toString()), // Index 6 represents the location of use
             trailing: Chip(
               label: Text(
                 overallStatus,

@@ -37,6 +37,7 @@ class IssuePage extends StatelessWidget {
   final String name;
   final DateTime issue_date;
   final DateTime return_date;
+  final String device;
 
   IssuePage(
       {required this.rollNo,
@@ -44,7 +45,8 @@ class IssuePage extends StatelessWidget {
       required this.phone_no,
       required this.name,
       required this.issue_date,
-      required this.return_date});
+      required this.return_date,
+      required this.device});
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +58,7 @@ class IssuePage extends StatelessWidget {
         name: name,
         issue_date: issue_date,
         return_date: return_date,
+        device: device,
       ),
     );
   }
@@ -68,6 +71,7 @@ class BleScanner extends StatefulWidget {
   final String name;
   final DateTime issue_date;
   final DateTime return_date;
+  final String device;
 
   BleScanner(
       {required this.rollNo,
@@ -75,7 +79,8 @@ class BleScanner extends StatefulWidget {
       required this.phone_no,
       required this.name,
       required this.issue_date,
-      required this.return_date});
+      required this.return_date,
+      required this.device});
 
   @override
   _BleScannerState createState() => _BleScannerState();
@@ -91,62 +96,73 @@ class _BleScannerState extends State<BleScanner> {
 
   bool issued = true;
 
-  Future<void> updateDeviceInfo(
-      String deviceId,
-      String username,
-      String locationOfUse,
-      String phone_no,
-      String name,
-      DateTime issue_date,
-      DateTime return_date) async {
-    readValues = [];
-    final url = Uri.parse('${startUrl}/devices/$deviceId/');
-
-    Map<String, String> headers = {
-      'Content-type': 'application/json',
-      'Accept': 'application/json',
-    };
-
-    Map<String, String> body = {
-      "device_id": "",
-      "device_name": "",
-      'username': username,
-      'phone_no': phone_no,
-      'name': name,
-      'issue_date':
-          issue_date.toIso8601String(), // Convert DateTime to ISO 8601 string
-      'return_date':
-          return_date.toIso8601String(), // Convert DateTime to ISO 8601 string
-      'location_of_use': locationOfUse,
-    };
-    print(body);
-    print(deviceId);
-    print(
-        '========================================================================================================================================');
-    try {
-      final response = await http.put(
-        url,
-        headers: headers,
-        body: json.encode(body),
-      );
-
-      if (response.statusCode == 200) {
-        showSnack("Issued Successflluy");
-        print('Device information updated successfully');
-      } else {
-        showSnack("Failed to issue, try again");
-        print('Failed to update device information: ${response.reasonPhrase}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
   @override
-  void initState() {
+  void initState() { 
     super.initState();
+    issueDevice(widget.rollNo, "",readValues[0], widget.device, widget.location, widget.issue_date, widget.return_date);
+    updateDeviceStatus(readValues[0], "Not Available");
     _initializeSharedPreferences();
   }
+
+  Future<void> issueDevice(String rollNo, String issueId, String deviceRfidId, String deviceName, String locationOfUse, DateTime issueDate, DateTime returnDeadline) async {
+  final logsApiUrl = 'http://192.168.0.125:8000/logs/issue/';
+
+  try {
+    // Issue device by adding a new entry to logs
+    final logsResponse = await http.post(
+      Uri.parse(logsApiUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'roll_no': rollNo,
+        'issue_id': issueId,
+        'device_rfid_id': deviceRfidId,
+        'device_name': deviceName,
+        'location_of_use': locationOfUse,
+        'issue_date': issueDate.toIso8601String(),
+        'return_deadline': returnDeadline.toIso8601String(),
+      }),
+    );
+
+    if (logsResponse.statusCode != 200) {
+      print('Failed to issue device. Logs status code: ${logsResponse.statusCode}');
+      return;
+    }
+    print('Device issued successfully');
+  
+  } catch (e) {
+    print('Error issuing device: $e');
+  }
+}
+
+Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
+  final devicesApiUrl = 'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
+
+  try {
+    // Update device status
+    final devicesResponse = await http.put(
+      Uri.parse(devicesApiUrl),
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+      },
+      body: json.encode(<String, String>{
+        'new_status': newStatus,
+      }),
+    );
+
+    if (devicesResponse.statusCode != 200) {
+      print('Failed to update device status. Devices status code: ${devicesResponse.statusCode}');
+      return;
+    }
+
+    print('Device status updated successfully');
+  } catch (e) {
+    print('Error updating device status: $e');
+  }
+}
+
+
 
   Future<void> _initializeSharedPreferences() async {
     await FlutterBluePlus.turnOn();
@@ -225,15 +241,8 @@ class _BleScannerState extends State<BleScanner> {
                       setState(() {
                         issued = true;
 
-                        // readValues.add(String.fromCharCodes(value));
-                        updateDeviceInfo(
-                            readValues[0],
-                            widget.rollNo,
-                            widget.location,
-                            widget.phone_no,
-                            widget.name,
-                            widget.issue_date,
-                            widget.return_date);
+                        readValues.add(String.fromCharCodes(value));
+                        issueDevice(widget.rollNo, "813", "297923", widget.device, widget.location, widget.issue_date, widget.return_date);
                         out = true;
                       });
                       showSnack("Successfully Issued");
@@ -428,63 +437,38 @@ class _BleScannerState extends State<BleScanner> {
             if (issued)
               Expanded(
                   child: ListView.builder(
-                itemCount: 7, // Number of items
+                itemCount: 8, // Number of items
                 itemBuilder: (context, index) {
                   // Use switch case to display different data based on index
                   switch (index) {
                     case 0:
                       return buildCard('Roll No', widget.rollNo);
-                    case 3:
-                      return buildCard('Location', widget.location);
                     case 1:
+                      return buildCard('Location', widget.location);
+                    case 2:
                       return buildCard('Name', widget.name);
-                    case 4:
+                    case 3:
                       return buildCard(
                         'Issue Date',
                         '${widget.issue_date.year}-${widget.issue_date.month.toString().padLeft(2, '0')}-${widget.issue_date.day.toString().padLeft(2, '0')}',
                       );
-                    case 5:
+                    case 4:
                       return buildCard(
                         'Return Date',
                         '${widget.return_date.year}-${widget.return_date.month.toString().padLeft(2, '0')}-${widget.return_date.day.toString().padLeft(2, '0')}',
                       );
-                    case 2:
+                    case 5:
+                      return buildCard(
+                        'Device Name',
+                        widget.device,
+                      );
+                    case 6:
                       return buildCard('Phone No', widget.phone_no);
                     default:
                       return SizedBox(); // Return an empty SizedBox for safety
                   }
                 },
               ))
-
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: readValues.length,
-            //     itemBuilder: (context, index) {
-            //       return Card(
-            //         elevation: 4, // Add elevation for a shadow effect
-            //         margin: EdgeInsets.symmetric(
-            //             vertical: 8,
-            //             horizontal: 16), // Add margin for spacing between cards
-            //         child: ListTile(
-            //           title: Text(
-            //             readValues[index],
-            //             style: TextStyle(
-            //                 fontSize: 16,
-            //                 fontWeight:
-            //                     FontWeight.bold), // Customize text style
-            //           ),
-            //           leading: CircleAvatar(
-            //             backgroundColor: Colors
-            //                 .blue, // Set background color for the leading icon
-            //             child: Icon(Icons.check,
-            //                 color: Colors
-            //                     .white), // Set icon for the leading widget
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
           ],
         ),
       ),
@@ -502,18 +486,7 @@ Widget buildCard(String label, String value) {
   );
 }
 
-// void writeCharacteristic(
-//     BluetoothDevice device, characteristicId, List<int> data) async {
-//   List<BluetoothService> services = await device.discoverServices();
-//   for (BluetoothService service in services) {
-//     for (BluetoothCharacteristic characteristic in service.characteristics) {
-//       if (characteristic.uuid == characteristicId) {
-//         await characteristic.write(data);
-//         print('Data written successfully.');
-//       }
-//     }
-//   }
-// }
+
 
 // 28:CD:C1:08:97:9C
 // 6e400003-b5a3-f393-e0a9-e50e24dcca9e

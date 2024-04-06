@@ -98,7 +98,8 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                         phone_no: widget.phone_no,
                         name: widget.name,
                         issue_date: widget.issue_date,
-                        return_date: widget.return_date),
+                        return_date: widget.return_date,
+                        device: "",),
                   ),
                 );
                 // .then((val) => {Navigator.pop(_context)});

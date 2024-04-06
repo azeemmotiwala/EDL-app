@@ -23,28 +23,28 @@ final TextEditingController facultyemailController = TextEditingController();
 
 
 
-String startUrl = "http://192.168.43.144:8000";
+// String startUrl = "http://192.168.43.144:8000";
 
-Future<void> sendOTP(String email) async {
-  try {
-    Map<String, String> headers = {'Content-Type': 'application/json'};
-    Map<String, dynamic> data = {"email": email};
-    print(email);
-    final response = await http.post(Uri.parse('${startUrl}/send-otp/'),
-        body: json.encode(data), headers: headers);
-    if (response.statusCode == 200) {
-      print('OTP sent successfully');
-    } else {
-      print('Failed to send OTP');
-      throw Exception('Failed to send OTP');
-    }
-  } catch (e) {
-    print('Error sending OTP: $e');
-    // setState(() {
-    //   _errorMessage = 'Failed to send OTP';
-    // });
-  }
-}
+// Future<void> sendOTP(String email) async {
+//   try {
+//     Map<String, String> headers = {'Content-Type': 'application/json'};
+//     Map<String, dynamic> data = {"email": email};
+//     print(email);
+//     final response = await http.post(Uri.parse('${startUrl}/send-otp/'),
+//         body: json.encode(data), headers: headers);
+//     if (response.statusCode == 200) {
+//       print('OTP sent successfully');
+//     } else {
+//       print('Failed to send OTP');
+//       throw Exception('Failed to send OTP');
+//     }
+//   } catch (e) {
+//     print('Error sending OTP: $e');
+//     // setState(() {
+//     //   _errorMessage = 'Failed to send OTP';
+//     // });
+//   }
+// }
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyissue =
     GlobalKey<ScaffoldMessengerState>();
@@ -66,6 +66,7 @@ class IssueUser extends StatelessWidget {
   final Map<String, dynamic> userData;
   const IssueUser({required this.userData});
 
+  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -87,10 +88,31 @@ class _IssueState extends State<_Issue> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? selectedDevice;
+  List<String> deviceNames = [];
+
+    @override
+  void initState() { 
+    super.initState();
+    fetchDeviceNames();
+  }
 
 
   DateTime selectedIssueDate = DateTime.now();
   DateTime selectedReturnDate = DateTime.now().add(Duration(days: 365 * 3)); // Default return date is current date + 3 years
+
+
+  Future<void> fetchDeviceNames() async {
+    final response = await http.get(Uri.parse('http://192.168.0.125:8000/unique-device-names/'));
+    if (response.statusCode == 200) {
+      List<dynamic> data = json.decode(response.body);
+      print(data);
+      setState(() {
+        deviceNames = data.cast<String>();
+      });
+    } else {
+      throw Exception('Failed to fetch device names');
+    }
+  }
 
 Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
 
@@ -195,54 +217,53 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                         ),
                         SizedBox(height: 20,),
                         Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Device Name',
-                              style: TextStyle(
-                                fontSize: 18.0,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 10),
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 12.0),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8.0),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<String>(
-                                  value: selectedDevice,
-                                  icon: Icon(Icons.arrow_drop_down),
-                                  iconSize: 36.0,
-                                  elevation: 16,
-                                  isExpanded: true,
-                                  style: TextStyle(color: Colors.black, fontSize: 18),
-                                  onChanged: (String? newValue) {
-                                    setState(() {
-                                      selectedDevice = newValue;
-                                    });
-                                  },
-                                  items: <String>['Device 1', 'Device 2', 'Device 3','Device 4','Device 5','Device 6' ] // Replace with your device names
-                                      .map<DropdownMenuItem<String>>((String value) {
-                                    return DropdownMenuItem<String>(
-                                      value: value,
-                                      child: Text(value),
-                                    );
-                                  }).toList(),
-                                  hint: Text(
-                                    'Select Device',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Device Name',
+                style: TextStyle(
+                  fontSize: 18.0,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 10),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: selectedDevice,
+                    icon: Icon(Icons.arrow_drop_down),
+                    iconSize: 36.0,
+                    elevation: 16,
+                    isExpanded: true,
+                    style: TextStyle(color: Colors.black, fontSize: 18),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        selectedDevice = newValue!;
+                      });
+                    },
+                    items: deviceNames.map((value) {
+                      return DropdownMenuItem<String>(
+                        value: value as String,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    hint: Text(
+                      'Select Device',
+                      style: TextStyle(
+                        color: Colors.grey[600],
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
                         SizedBox(height: 20,),
                       ],
                     ),

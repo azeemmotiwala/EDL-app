@@ -50,11 +50,22 @@ class _BleScannerState extends State<BleScanner> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  Future<void> discardDevice(String serialNo) async {
-    showSnack("Discarded Successfully");
-    //make api call with serial no, if no serial no exist in database, then show invalid serial no, if yes, then remove it from database;
-  }
+Future<void> deleteDevice(String serialNumber) async {
+  final String baseUrl = 'http://192.168.0.125:8000'; // Replace this with your base URL
+  final String endpoint = '/devices/${serialNumber}/';
 
+  try {
+    final response = await http.delete(Uri.parse(baseUrl + endpoint));
+
+    if (response.statusCode == 200) {
+      print('Device deleted successfully');
+    } else {
+      print('Failed to delete device: ${response.reasonPhrase}');
+    }
+  } catch (e) {
+    print('Error: $e');
+  }
+}
   @override
   void initState() {
     super.initState();
@@ -125,7 +136,7 @@ class _BleScannerState extends State<BleScanner> {
             ElevatedButton(
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
-                  discardDevice(serialnoController.text);
+                  deleteDevice(serialnoController.text);
                 } else {
                   print('Serial number field is empty');
                 }

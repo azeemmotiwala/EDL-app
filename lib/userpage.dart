@@ -138,7 +138,7 @@ class _UserState extends State<UserPage> {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: 2,
+              itemCount: 1,
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
@@ -148,12 +148,9 @@ class _UserState extends State<UserPage> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => IssueUser(userData: widget.userData,),
-
                         ),
                       );
-                    } else if (index == 1) {
-                      Navigator.pushNamed(context, '/issue');
-                    }
+                    } 
                   },
                   child: Card(
                     margin: EdgeInsets.all(10),
@@ -184,8 +181,6 @@ class _UserState extends State<UserPage> {
     switch (index) {
       case 0:
         return Icons.assignment;
-      case 1:
-        return Icons.extension;
       default:
         return Icons.error;
     }
@@ -195,8 +190,6 @@ class _UserState extends State<UserPage> {
     switch (index) {
       case 0:
         return 'Issue';
-      case 1:
-        return 'Extend';
       default:
         return 'Unknown';
     }

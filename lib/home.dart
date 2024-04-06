@@ -215,7 +215,7 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 2) {
-                          if (isConnected == true) {
+                          if (isConnected == false) {
                             // Navigator.pushNamed(context, '/return');
                             Navigator.of(context)
                                 .pushNamed('/return')

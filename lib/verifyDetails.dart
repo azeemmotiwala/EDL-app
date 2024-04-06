@@ -14,11 +14,10 @@ String generateRandomRequestId() {
 
 Future<void> addRequest(String deviceName, String rollNo, String email, String name, String phoneNo, String locationOfUse, String facultyStatus, String staffStatus, String adminStatus) async {
   // Define the API endpoint URL for adding a request
-  final apiUrl = Uri.parse('http://10.59.1.225:8000/add-request/');
+  final apiUrl = Uri.parse('http://192.168.0.125:8000/add-request/');
 
   // Create the payload for the request
   Map<String, dynamic> data = {
-    'request_id': generateRandomRequestId(),
     'device_name': deviceName,
     'roll_no': rollNo,
     'email': email,
@@ -40,7 +39,7 @@ Future<void> addRequest(String deviceName, String rollNo, String email, String n
 
   try {
     // Send the HTTP POST request to add the request
-    http.Response response = await http.post(apiUrl, headers: headers, body: body);
+    final response = await http.post(apiUrl, headers: headers, body: body);
     
     // Check the response status code
     if (response.statusCode == 200) {

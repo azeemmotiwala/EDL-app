@@ -12,7 +12,7 @@ import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = "http://192.168.0.125:8000";
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -47,6 +47,7 @@ class BleScanner extends StatefulWidget {
 }
 
 class _BleScannerState extends State<BleScanner> {
+
   List<BluetoothDevice> devices = [];
   List<String> readValues = [];
   bool check = true;
@@ -56,27 +57,21 @@ class _BleScannerState extends State<BleScanner> {
   bool out = false;
 
   Future<void> addDevice(
-      String deviceId, String deviceName, String serialNo) async {
+      String deviceId, String deviceName, String serialNo, String original_location, String description)async {
     readValues = [];
     final url = Uri.parse('${startUrl}/devices/');
 
     Map<String, String> headers = {
       'Content-type': 'application/json',
-      'Accept': 'application/json',
     };
 
-    Map<String, String> body = {
-      "device_id": deviceId,
-      "serial_no": serialNo,
+    Map<String, dynamic> body = {
+      "serial_number": serialNo,
+      "rfid_id" : deviceId,
       "device_name": deviceName,
-      'username': "",
-      'phone_no': "",
-      'name': "",
-      'issue_date': DateTime.now()
-          .toIso8601String(), // Convert DateTime to ISO 8601 string
-      'return_date': DateTime.now()
-          .toIso8601String(), // Convert DateTime to ISO 8601 string
-      'location_of_use': "",
+      'original_location': original_location,
+      'status': "Available",
+      'description': description,
     };
 
     try {
@@ -101,6 +96,8 @@ class _BleScannerState extends State<BleScanner> {
   void initState() {
     super.initState();
     _initializeSharedPreferences();
+    addDevice("128376", "SMD", "1837187", "WEL-4", "Working Device");
+
   }
 
   Future<void> _initializeSharedPreferences() async {
@@ -152,7 +149,7 @@ class _BleScannerState extends State<BleScanner> {
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
                         addDevice(readValues[0], devicenameController.text,
-                            serialnoController.text);
+                            serialnoController.text, "WEL-4", "Working Device");
                         out = true;
                       });
                       out = true;
@@ -346,7 +343,6 @@ class _BleScannerState extends State<BleScanner> {
               onPressed: isConnected
                   ? () async {
                       // Simulating a Bluetooth device
-
                       if (devices.length != 0) {
                         await writeData(devices[0], "add\r");
                       } else {

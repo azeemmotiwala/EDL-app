@@ -6,7 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
@@ -60,7 +60,6 @@ class _BleScannerState extends State<BleScanner> {
     readValues.add("210070058");
     readValues.add("h 6");
     readValues.add("2024-12-01");
-    print("aaaaaaaaaaaaaaaaaaaagya");
     super.initState();
     _initializeSharedPreferences();
   }
@@ -95,6 +94,37 @@ class _BleScannerState extends State<BleScanner> {
     //   startScanning();
     // }
     // Call _loadDevices after _prefs is initialized
+  }
+
+  Future<bool> verifyDevice(String rfidId) async {
+    final apiUrl = Uri.parse('http://192.168.0.125:8000/devices/${rfidId}/${DateTime.now().toIso8601String()}/verified/verify/');
+    try {
+        final response = await http.put(apiUrl,
+        // body: jsonEncode({
+        //   'verify': 'verified', // Assuming 'verified' is the verification status
+        //   'prv_verify_date': "2024-04-06T11:04:42.541Z", // Set current date as previous verification date
+        // }),
+        headers: {'Content-Type': 'application/json'} // Set request header
+    );  
+    if (response.statusCode == 200) {
+        // If the verification is successful, reload device statuss
+        showSnack("Verified Successfully");
+        return true;
+      }else if( response.statusCode == 404){
+        showSnack("Device not found");
+        return false;
+      }
+       else {
+        showSnack("Try again, not verified");
+        return false;
+        // throw Exception('Failed to verify device');
+      }
+    } catch (error) {
+      showSnack("Server Error");
+        print(error);
+      return false;
+      // throw Exception('Failed to connect to the server');
+    }
   }
 
   Future<void> _loadCommonVariable() async {
@@ -250,11 +280,7 @@ class _BleScannerState extends State<BleScanner> {
             if (showVerify)
               ElevatedButton(
                 onPressed: () {
-                  setState(() {
-                    isVerified = true;
-                    showSnack("Verified Successfully");
-                  });
-                  // Call the original onPressed callback
+                  verifyDevice("297999823");
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
