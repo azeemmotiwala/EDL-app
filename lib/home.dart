@@ -74,8 +74,13 @@ class _HomeState extends State<Home> {
     // Perform actions you want when navigating back to the home page
     print("Navigated back to home page");
     await _loadCommonVariable();
-    if (isConnected == false) {
-      print(devices);
+    // ignore: deprecated_member_use
+    if ((isConnected == false) ||
+        // ignore: deprecated_member_use
+        (devices[0].state != BluetoothDeviceState.connected)) {
+      // print(devices);
+      isConnected = false;
+      _setCommonVariable(false);
       devices = [];
       check = true;
       startScanning();
@@ -188,7 +193,8 @@ class _HomeState extends State<Home> {
                       onTap: () {
                         if (index == 0) {
                           print("11111111111111");
-                          if (isConnected == false) {
+                          if (isConnected == true) {
+                            // FlutterBluePlus.stopScan();
                             // ignore: deprecated_member_use
                             // Navigator.popAndPushNamed(context, '/scan');
                             Navigator.of(context)
@@ -201,8 +207,8 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 1) {
-                          if (isConnected == false) {
-                            FlutterBluePlus.stopScan();
+                          if (isConnected == true) {
+                            // FlutterBluePlus.stopScan();
 
                             // Navigator.pushNamed(context, '/issue');
                             Navigator.of(context)
@@ -215,8 +221,10 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 2) {
-                          if (isConnected == false) {
+                          if (isConnected == true) {
                             // Navigator.pushNamed(context, '/return');
+                            // FlutterBluePlus.stopScan();
+
                             Navigator.of(context)
                                 .pushNamed('/return')
                                 .then((value) {
@@ -237,6 +245,7 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 4) {
+                          FlutterBluePlus.stopScan();
                           // Navigator.pushNamed(context, '/update');
                           Navigator.of(context)
                               .pushNamed('/discard')

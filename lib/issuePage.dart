@@ -94,104 +94,96 @@ class _BleScannerState extends State<BleScanner> {
   late bool isConnected = false;
   bool out = false;
 
-  bool issued = true;
+  bool issued = false;
 
   @override
-  void initState() { 
+  void initState() {
     super.initState();
-    issueDevice(widget.rollNo, "",readValues[0], widget.device, widget.location, widget.issue_date, widget.return_date);
-    updateDeviceStatus(readValues[0], "Not Available");
     _initializeSharedPreferences();
   }
 
-  Future<void> issueDevice(String rollNo, String issueId, String deviceRfidId, String deviceName, String locationOfUse, DateTime issueDate, DateTime returnDeadline) async {
-  final logsApiUrl = 'http://192.168.0.125:8000/logs/issue/';
+  Future<void> issueDevice(
+      String rollNo,
+      String issueId,
+      String deviceRfidId,
+      String deviceName,
+      String locationOfUse,
+      DateTime issueDate,
+      DateTime returnDeadline) async {
+    final logsApiUrl = 'http://192.168.0.125:8000/logs/issue/';
 
-  try {
-    // Issue device by adding a new entry to logs
-    final logsResponse = await http.post(
-      Uri.parse(logsApiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode(<String, dynamic>{
-        'roll_no': rollNo,
-        'issue_id': issueId,
-        'device_rfid_id': deviceRfidId,
-        'device_name': deviceName,
-        'location_of_use': locationOfUse,
-        'issue_date': issueDate.toIso8601String(),
-        'return_deadline': returnDeadline.toIso8601String(),
-      }),
-    );
+    try {
+      // Issue device by adding a new entry to logs
+      final logsResponse = await http.post(
+        Uri.parse(logsApiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(<String, dynamic>{
+          'roll_no': rollNo,
+          'issue_id': issueId,
+          'device_rfid_id': deviceRfidId,
+          'device_name': deviceName,
+          'location_of_use': locationOfUse,
+          'issue_date': issueDate.toIso8601String(),
+          'return_deadline': returnDeadline.toIso8601String(),
+        }),
+      );
 
-    if (logsResponse.statusCode != 200) {
-      print('Failed to issue device. Logs status code: ${logsResponse.statusCode}');
-      return;
+      if (logsResponse.statusCode != 200) {
+        print(
+            'Failed to issue device. Logs status code: ${logsResponse.statusCode}');
+        return;
+      }
+      print('Device issued successfully');
+    } catch (e) {
+      print('Error issuing device: $e');
     }
-    print('Device issued successfully');
-  
-  } catch (e) {
-    print('Error issuing device: $e');
   }
-}
 
-Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
-  final devicesApiUrl = 'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
+  Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
+    final devicesApiUrl =
+        'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
 
-  try {
-    // Update device status
-    final devicesResponse = await http.put(
-      Uri.parse(devicesApiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(<String, String>{
-        'new_status': newStatus,
-      }),
-    );
+    try {
+      // Update device status
+      final devicesResponse = await http.put(
+        Uri.parse(devicesApiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(<String, String>{
+          'new_status': newStatus,
+        }),
+      );
 
-    if (devicesResponse.statusCode != 200) {
-      print('Failed to update device status. Devices status code: ${devicesResponse.statusCode}');
-      return;
+      if (devicesResponse.statusCode != 200) {
+        print(
+            'Failed to update device status. Devices status code: ${devicesResponse.statusCode}');
+        return;
+      }
+
+      print('Device status updated successfully');
+    } catch (e) {
+      print('Error updating device status: $e');
     }
-
-    print('Device status updated successfully');
-  } catch (e) {
-    print('Error updating device status: $e');
   }
-}
-
-
 
   Future<void> _initializeSharedPreferences() async {
     await FlutterBluePlus.turnOn();
     _prefs = await SharedPreferences.getInstance();
     await _loadCommonVariable();
 
-    if (isConnected == true) {
-      if (devices.length != 0) {
-        await writeData(devices[0]);
-      } else {
-        showSnack("Device disconnected, connect again!");
-        isConnected = false;
-        _setCommonVariable(false);
-        devices = [];
-        context.read<DeviceProvider>().setDevices(devices);
-      }
-
-      if (devices.length != 0) {
-        out = false;
-        await readData(devices[0]);
-      } else {
-        showSnack("Device disconnected, connect again!");
-        isConnected = false;
-        _setCommonVariable(false);
-        devices = [];
-        context.read<DeviceProvider>().setDevices(devices);
-      }
+    if ((isConnected == true) && (devices.length != 0)) {
+      await writeData(devices[0]);
+      out = false;
+      await readData(devices[0]);
     } else {
       showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
     }
 
     // read
@@ -239,10 +231,18 @@ Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
                     if (String.fromCharCodes(value) != "") {
                       print("went inside");
                       setState(() {
+                        readValues.add(String.fromCharCodes(value));
+                        issueDevice(
+                            widget.rollNo,
+                            "",
+                            readValues[0],
+                            widget.device,
+                            widget.location,
+                            widget.issue_date,
+                            widget.return_date);
+                        updateDeviceStatus(readValues[0], "Not Available");
                         issued = true;
 
-                        readValues.add(String.fromCharCodes(value));
-                        issueDevice(widget.rollNo, "813", "297923", widget.device, widget.location, widget.issue_date, widget.return_date);
                         out = true;
                       });
                       showSnack("Successfully Issued");
@@ -395,6 +395,45 @@ Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
             //   },
             // ),
             SizedBox(height: 20),
+
+            if (!issued)
+              Center(
+                child: Container(
+                  width: 300, // Adjust width as needed
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 109, 163, 208),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.bluetooth_searching,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Scan the Device...',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             // ElevatedButton(
             //   onPressed: isConnected
             //       ? () async {
@@ -425,7 +464,7 @@ Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
             //     style: TextStyle(fontSize: 18),
             //   ),
             // ),
-            SizedBox(height: 20),
+            // SizedBox(height: 20),
 
             // String deviceId,
             // String username,
@@ -442,28 +481,28 @@ Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
                   // Use switch case to display different data based on index
                   switch (index) {
                     case 0:
-                      return buildCard('Roll No', widget.rollNo);
+                      return buildCard('Roll No:', widget.rollNo);
                     case 1:
-                      return buildCard('Location', widget.location);
+                      return buildCard('Location:', widget.location);
                     case 2:
-                      return buildCard('Name', widget.name);
+                      return buildCard('Name:', widget.name);
                     case 3:
                       return buildCard(
-                        'Issue Date',
+                        'Issue Date:',
                         '${widget.issue_date.year}-${widget.issue_date.month.toString().padLeft(2, '0')}-${widget.issue_date.day.toString().padLeft(2, '0')}',
                       );
                     case 4:
                       return buildCard(
-                        'Return Date',
+                        'Return Date:',
                         '${widget.return_date.year}-${widget.return_date.month.toString().padLeft(2, '0')}-${widget.return_date.day.toString().padLeft(2, '0')}',
                       );
                     case 5:
                       return buildCard(
-                        'Device Name',
+                        'Device Name:',
                         widget.device,
                       );
                     case 6:
-                      return buildCard('Phone No', widget.phone_no);
+                      return buildCard('Phone No:', widget.phone_no);
                     default:
                       return SizedBox(); // Return an empty SizedBox for safety
                   }
@@ -478,14 +517,33 @@ Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
 
 Widget buildCard(String label, String value) {
   return Card(
-    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: ListTile(
-      title: Text(label),
-      subtitle: Text(value),
+    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.lightBlueAccent),
+          ),
+          SizedBox(width: 25.0),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              // fontFamily: 'Roboto',
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
-
 
 
 // 28:CD:C1:08:97:9C

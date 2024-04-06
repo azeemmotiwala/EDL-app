@@ -16,12 +16,9 @@ final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
 final TextEditingController locationController = TextEditingController();
 final TextEditingController phoneController = TextEditingController();
-final TextEditingController nameController= TextEditingController();
+final TextEditingController nameController = TextEditingController();
 final TextEditingController returnDateController = TextEditingController();
 final TextEditingController facultyemailController = TextEditingController();
-
-
-
 
 // String startUrl = "http://192.168.43.144:8000";
 
@@ -62,47 +59,48 @@ void showSnack(String title) {
 }
 
 class IssueUser extends StatelessWidget {
-
   final Map<String, dynamic> userData;
   const IssueUser({required this.userData});
 
-  
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: _Issue(userData: userData,),
+      home: _Issue(
+        userData: userData,
+      ),
     );
   }
 }
 
 class _Issue extends StatefulWidget {
   @override
-  
-    final Map<String, dynamic> userData;
-    const _Issue({required this.userData});
+  final Map<String, dynamic> userData;
+  const _Issue({required this.userData});
 
   _IssueState createState() => _IssueState();
 }
 
 class _IssueState extends State<_Issue> {
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? selectedDevice;
   List<String> deviceNames = [];
 
-    @override
-  void initState() { 
+  @override
+  void initState() {
     super.initState();
+    facultyemailController.clear();
+    locationController.clear();
+
     fetchDeviceNames();
   }
 
-
   DateTime selectedIssueDate = DateTime.now();
-  DateTime selectedReturnDate = DateTime.now().add(Duration(days: 365 * 3)); // Default return date is current date + 3 years
-
+  DateTime selectedReturnDate = DateTime.now().add(
+      Duration(days: 365 * 3)); // Default return date is current date + 3 years
 
   Future<void> fetchDeviceNames() async {
-    final response = await http.get(Uri.parse('http://192.168.0.125:8000/unique-device-names/'));
+    final response = await http
+        .get(Uri.parse('http://192.168.0.125:8000/unique-device-names/'));
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body);
       print(data);
@@ -114,30 +112,30 @@ class _IssueState extends State<_Issue> {
     }
   }
 
-Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
-
-  final DateTime? picked = await showDatePicker(
-    context: context,
-    initialDate: isIssueDate ? selectedIssueDate : selectedReturnDate,
-    firstDate: DateTime.now(),
-    lastDate: DateTime.now().add(Duration(days: 365 * 3)), // Last date is current date + 3 years
-  );
-  if (picked != null) {
-    setState(() {
-      if (isIssueDate) {
-        selectedIssueDate = picked;
-      } else {
-        selectedReturnDate = picked;
-        // Set the value of the return date text field
-        returnDateController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-      }
-    });
+  Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: isIssueDate ? selectedIssueDate : selectedReturnDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now()
+          .add(Duration(days: 365 * 3)), // Last date is current date + 3 years
+    );
+    if (picked != null) {
+      setState(() {
+        if (isIssueDate) {
+          selectedIssueDate = picked;
+        } else {
+          selectedReturnDate = picked;
+          // Set the value of the return date text field
+          returnDateController.text =
+              '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+        }
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
-
     return ScaffoldMessenger(
       // key: scaffoldMessengerKeyissue,
       child: Scaffold(
@@ -151,7 +149,7 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
         ),
         body: SingleChildScrollView(
           child: SizedBox(
-            height: MediaQuery.of(context).size.height*1.5,
+            height: MediaQuery.of(context).size.height * 1.5,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -177,9 +175,9 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             TextFormField(
                               controller: locationController,
                               validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter location';
-                              }
+                                if (value!.isEmpty) {
+                                  return 'Please enter location';
+                                }
                               },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
@@ -189,7 +187,9 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             ),
                           ],
                         ),
-                        SizedBox(height: 20,),
+                        SizedBox(
+                          height: 20,
+                        ),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -203,9 +203,9 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             TextFormField(
                               controller: facultyemailController,
                               validator: (value) {
-                              if (value!.isEmpty) {
-                                return 'Please enter faculty email';
-                              }
+                                if (value!.isEmpty) {
+                                  return 'Please enter faculty email';
+                                }
                               },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(),
@@ -215,56 +215,61 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
                             ),
                           ],
                         ),
-                        SizedBox(height: 20,),
+                        SizedBox(
+                          height: 20,
+                        ),
                         Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Device Name',
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    value: selectedDevice,
-                    icon: Icon(Icons.arrow_drop_down),
-                    iconSize: 36.0,
-                    elevation: 16,
-                    isExpanded: true,
-                    style: TextStyle(color: Colors.black, fontSize: 18),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        selectedDevice = newValue!;
-                      });
-                    },
-                    items: deviceNames.map((value) {
-                      return DropdownMenuItem<String>(
-                        value: value as String,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                    hint: Text(
-                      'Select Device',
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 18,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-                        SizedBox(height: 20,),
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Device Name',
+                              style: TextStyle(
+                                fontSize: 18.0,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 12.0),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: selectedDevice,
+                                  icon: Icon(Icons.arrow_drop_down),
+                                  iconSize: 36.0,
+                                  elevation: 16,
+                                  isExpanded: true,
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 18),
+                                  onChanged: (String? newValue) {
+                                    setState(() {
+                                      selectedDevice = newValue!;
+                                    });
+                                  },
+                                  items: deviceNames.map((value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value as String,
+                                      child: Text(value),
+                                    );
+                                  }).toList(),
+                                  hint: Text(
+                                    'Select Device',
+                                    style: TextStyle(
+                                      color: Colors.grey[600],
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 20,
+                        ),
                       ],
                     ),
                   ),
@@ -295,7 +300,7 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
             ),
           ),
         ),
-      ),            
+      ),
     );
   }
 
@@ -304,11 +309,9 @@ Future<void> _selectDate(BuildContext context, bool isIssueDate) async {
     FlutterBluePlus.stopScan();
     super.dispose();
   }
-
 }
 
 class CardButton extends StatelessWidget {
-
   final VoidCallback onPressed;
   final String text;
   final IconData icon;

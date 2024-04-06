@@ -97,7 +97,7 @@
 //         const SizedBox(height: 10),
 //         ElevatedButton(
 //           onPressed: () async {
-            
+
 //             // Navigator.pushReplacementNamed(context, '/home');
 //             // If the credentials are valid, proceed to the home screen
 
@@ -106,7 +106,7 @@
 
 //               if ( usernameController.text == "admin" && passwordController.text == "edl123"){
 //                 Navigator.pushReplacementNamed(context, '/home');
-//               } 
+//               }
 //               // Check if the username exists
 //               // bool checkUser = await checkUserCredentials(usernameController.text, passwordController.text);
 //               // bool checkInstructor = await checkInstructorCredentials(usernameController.text, passwordController.text);
@@ -171,7 +171,6 @@
 //   }
 // }
 
-
 // import 'package:edl_app/home.dart';
 // import 'package:flutter/material.dart';
 // import 'package:http/http.dart' as http;
@@ -196,8 +195,6 @@
 //   ));
 //   scaffoldMessengerKey.currentState?.showSnackBar(snackbar);
 // }
-
-
 
 // class LoginPage extends StatefulWidget {
 //   @override
@@ -334,11 +331,11 @@
 //                   style: TextStyle(fontSize: 18),
 //                 ),
 //                 SizedBox(height: 10),
-//                 if (_userData!['first_name'] != null && _userData!['last_name'] != null) 
+//                 if (_userData!['first_name'] != null && _userData!['last_name'] != null)
 //                   Text('Name: ${_userData!['first_name']} ${_userData!['last_name']}'),
-//                 if (_userData!['email'] != null) 
+//                 if (_userData!['email'] != null)
 //                   Text('Email: ${_userData!['email']}'),
-//                 if (_userData!['roll_number'] != null) 
+//                 if (_userData!['roll_number'] != null)
 //                   Text('Roll Number: ${_userData!['roll_number']}'),
 //                 if (_userData!['program'] != null) ...[
 //                   Text('Department: ${_userData!['program']['department_name']}'),
@@ -359,7 +356,7 @@
 //   }
 
 //   void launchAuthorizationUrl() async {
-//     final authorizationUrl = 'https://gymkhana.iitb.ac.in/profiles/oauth/authorize/?' 
+//     final authorizationUrl = 'https://gymkhana.iitb.ac.in/profiles/oauth/authorize/?'
 //         'client_id=$clientId&'
 //         'response_type=code&'
 //         'scope=basic profile picture sex ldap phone insti_address program secondary_emails send_mail&'
@@ -381,8 +378,10 @@ import 'package:uni_links/uni_links.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:edl_app/home.dart';
 
-const String clientId = 'TJh0OvVfNjOiFn6USmuL4QjaXm7np6dnQNSLxPyU'; // Replace with your OAuth2 client ID
-const String clientSecret = 'WDxMJPKRZHdUvtBtlQv9j1y5ITwZxVfE8J9azhqp3n72SPshj44itgHTwNiywO0eH1CYZOhP1mzQbmNLtPKxhbJLTfoAMtjWRNrdYaPKG92aXBQoJplPzegLvdJDyzj2'; // Replace with your OAuth2 client secret
+const String clientId =
+    'TJh0OvVfNjOiFn6USmuL4QjaXm7np6dnQNSLxPyU'; // Replace with your OAuth2 client ID
+const String clientSecret =
+    'WDxMJPKRZHdUvtBtlQv9j1y5ITwZxVfE8J9azhqp3n72SPshj44itgHTwNiywO0eH1CYZOhP1mzQbmNLtPKxhbJLTfoAMtjWRNrdYaPKG92aXBQoJplPzegLvdJDyzj2'; // Replace with your OAuth2 client secret
 
 // final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
@@ -453,7 +452,8 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> exchangeAuthorizationCode(String authorizationCode) async {
     final String basicAuth =
         'Basic ' + base64Encode(utf8.encode('$clientId:$clientSecret'));
-    final Uri tokenUri = Uri.parse('https://gymkhana.iitb.ac.in/profiles/oauth/token/');
+    final Uri tokenUri =
+        Uri.parse('https://gymkhana.iitb.ac.in/profiles/oauth/token/');
     final Map<String, String> headers = {
       'Authorization': basicAuth,
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -480,7 +480,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Future<void> fetchUserData(String accessToken) async {
-    final userApiUrl = 'https://gymkhana.iitb.ac.in/profiles/user/api/user/?fields=first_name,last_name,type,profile_picture,sex,username,email,program,contacts,insti_address,secondary_emails,mobile,roll_number';
+    final userApiUrl =
+        'https://gymkhana.iitb.ac.in/profiles/user/api/user/?fields=first_name,last_name,type,profile_picture,sex,username,email,program,contacts,insti_address,secondary_emails,mobile,roll_number';
     final headers = {'Authorization': 'Bearer $accessToken'};
     final response = await http.get(Uri.parse(userApiUrl), headers: headers);
     if (response.statusCode == 200) {
@@ -490,19 +491,24 @@ class _LoginPageState extends State<LoginPage> {
         _userData = userData;
         _isLoading = false; // Hide loading screen after fetching user data
       });
-      if( userData['roll_number'] == "210070018"){
+      if (userData['roll_number'] == "210070018") {
+        Navigator.pop(context);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => Home(userData: userData,),
+            builder: (context) => Home(
+              userData: userData,
+            ),
           ),
         );
-      }
-      else{
+      } else {
+        Navigator.pop(context);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => UserPage(userData: userData,),
+            builder: (context) => UserPage(
+              userData: userData,
+            ),
           ),
         );
       }
@@ -552,7 +558,8 @@ class _LoginPageState extends State<LoginPage> {
             style: ElevatedButton.styleFrom(
               primary: Colors.blue[500],
             ),
-            child: Text('Login with SSO', style: TextStyle(color: Colors.black)),
+            child:
+                Text('Login with SSO', style: TextStyle(color: Colors.black)),
           ),
           SizedBox(height: 20),
           // if (_userData != null) ...[
@@ -584,13 +591,16 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void launchAuthorizationUrl() async {
-    final authorizationUrl = 'https://gymkhana.iitb.ac.in/profiles/oauth/authorize/?' 
+    final authorizationUrl =
+        'https://gymkhana.iitb.ac.in/profiles/oauth/authorize/?'
         'client_id=$clientId&'
         'response_type=code&'
         'scope=basic profile picture sex ldap phone insti_address program secondary_emails send_mail&'
         'state=some_state';
-
-    if (await canLaunch(authorizationUrl)) {
+    // ignore: deprecated_member_use
+    var x = await canLaunch(authorizationUrl);
+    print(x);
+    if (true) {
       await launch(authorizationUrl);
     } else {
       print('Failed to launch authorization URL');

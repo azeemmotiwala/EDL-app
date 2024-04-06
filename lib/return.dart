@@ -47,34 +47,27 @@ class BleScanner extends StatefulWidget {
 class _BleScannerState extends State<BleScanner> {
   List<BluetoothDevice> devices = [];
   List<String> readValues = [];
+  List<String> logs = [];
   bool check = true;
   late SharedPreferences _prefs;
   late bool isConnected = false;
   // bool isConnected = false;
   bool out = false;
+  bool showinfo = false;
 
   @override
   void initState() {
     super.initState();
     _initializeSharedPreferences();
-    _returnDevice(DateTime.now(), "348108");
+    // _returnDevice(DateTime.now(), "348108");
   }
 
   Future<void> _initializeSharedPreferences() async {
     await FlutterBluePlus.turnOn();
     _prefs = await SharedPreferences.getInstance();
     await _loadCommonVariable();
-    if (devices.length != 0) {
+    if ((devices.length != 0) && (isConnected == true)) {
       await writeData(devices[0], "return\r");
-    } else {
-      showSnack("Device disconnected, connect again!");
-      isConnected = false;
-      _setCommonVariable(false);
-      devices = [];
-      context.read<DeviceProvider>().setDevices(devices);
-    }
-
-    if (devices.length != 0) {
       await readData(devices[0]);
     } else {
       showSnack("Device disconnected, connect again!");
@@ -83,6 +76,7 @@ class _BleScannerState extends State<BleScanner> {
       devices = [];
       context.read<DeviceProvider>().setDevices(devices);
     }
+
     // if (isConnected == false) {
     //   devices = [];
     //   startScanning();
@@ -107,65 +101,71 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
-  final devicesApiUrl = 'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
+    final devicesApiUrl =
+        'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
 
-  try {
-    // Update device status
-    final devicesResponse = await http.put(
-      Uri.parse(devicesApiUrl),
-      headers: <String, String>{
-        'Content-Type': 'application/json',
-      },
-      body: json.encode(<String, String>{
-        'new_status': newStatus,
-      }),
-    );
+    try {
+      // Update device status
+      final devicesResponse = await http.put(
+        Uri.parse(devicesApiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: json.encode(<String, String>{
+          'new_status': newStatus,
+        }),
+      );
 
-    if (devicesResponse.statusCode != 200) {
-      print('Failed to update device status. Devices status code: ${devicesResponse.statusCode}');
-      return;
+      if (devicesResponse.statusCode != 200) {
+        print(
+            'Failed to update device status. Devices status code: ${devicesResponse.statusCode}');
+        return;
+      }
+      print('Device status updated successfully');
+    } catch (e) {
+      print('Error updating device status: $e');
     }
-    print('Device status updated successfully');
-  } catch (e) {
-    print('Error updating device status: $e');
   }
-}
-
 
   Future<void> _returnDevice(DateTime return_date, String rfidId) async {
-    final apiUrl = Uri.parse('http://192.168.0.125:8000/logs/${rfidId}/return/${return_date.toIso8601String()}');
+    final apiUrl = Uri.parse(
+        'http://192.168.0.125:8000/logs/${rfidId}/return/${return_date.toIso8601String()}');
     // final returnDate = _returnDateController.text;
     try {
       final response = await http.put(
         apiUrl,
         // body: {'return_date': return_date.toIso8601String()},
       );
-      if (response.statusCode == 200) { 
-        
+      if (response.statusCode == 200) {
         updateDeviceStatus(rfidId, "Available");
         _getLogsByRfid(rfidId);
-
-      } else {
-      }
-    } catch (error) {
-    }
+      } else {}
+    } catch (error) {}
   }
 
   Future<void> _getLogsByRfid(String rfidId) async {
-    
     try {
-      final response = await http.get(Uri.parse('http://192.168.0.125:8000/logs/rfid/$rfidId'));
+      final response = await http
+          .get(Uri.parse('http://192.168.0.125:8000/logs/rfid/$rfidId'));
       if (response.statusCode == 200) {
-        print(jsonDecode(response.body)['logs']);
-        print("'++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+        // print(jsonDecode(response.body)['logs']);
+        List<String> res = jsonDecode(response.body)['logs'];
+        setState(() {
+          logs.add(res[1]);
+          logs.add(res[3]);
+          logs.add(res[5]);
+          showinfo = true;
+        });
 
+        // logs.add(res[1]);
+        print(
+            "'++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
       } else if (response.statusCode == 404) {
       } else {
         throw Exception('Failed to fetch logs');
       }
     } catch (error) {
-    } finally {
-    }
+    } finally {}
   }
 
   Future<void> readData(BluetoothDevice device) async {
@@ -342,35 +342,65 @@ class _BleScannerState extends State<BleScanner> {
             //   ),
             // ),
             SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: readValues.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 4, // Add elevation for a shadow effect
-                    margin: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16), // Add margin for spacing between cards
-                    child: ListTile(
-                      title: Text(
-                        readValues[index],
+
+            if (!showinfo)
+              Center(
+                child: Container(
+                  width: 300, // Adjust width as needed
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 109, 163, 208),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.bluetooth_searching,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Scan the Device...',
                         style: TextStyle(
-                            fontSize: 16,
-                            fontWeight:
-                                FontWeight.bold), // Customize text style
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
                       ),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors
-                            .blue, // Set background color for the leading icon
-                        child: Icon(Icons.check,
-                            color: Colors
-                                .white), // Set icon for the leading widget
-                      ),
-                    ),
-                  );
-                },
+                    ],
+                  ),
+                ),
               ),
-            ),
+
+            if (showinfo)
+              Expanded(
+                  child: ListView.builder(
+                itemCount: 8, // Number of items
+                itemBuilder: (context, index) {
+                  // Use switch case to display different data based on index
+                  switch (index) {
+                    case 0:
+                      return buildCard('Roll No:', logs[0]);
+                    case 1:
+                      return buildCard('Device Name:', logs[1]);
+                    case 2:
+                      return buildCard('Issue Date:', logs[2]);
+
+                    default:
+                      return SizedBox(); // Return an empty SizedBox for safety
+                  }
+                },
+              ))
           ],
         ),
       ),
@@ -378,11 +408,37 @@ class _BleScannerState extends State<BleScanner> {
   }
 }
 
-
-
-
 // 28:CD:C1:08:97:9C
 // 6e400003-b5a3-f393-e0a9-e50e24dcca9e
 
 //write
 //  serviceUuid: 6e400001-b5a3-f393-e0a9-e50e24dcca9e, secondaryServiceUuid: null, characteristicUuid: 6e400002-b5a3-f393-e0a9-e50e24dcca9e
+Widget buildCard(String label, String value) {
+  return Card(
+    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.lightBlueAccent),
+          ),
+          SizedBox(width: 25.0),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              // fontFamily: 'Roboto',
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}

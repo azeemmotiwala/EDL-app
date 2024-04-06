@@ -50,25 +50,34 @@ class _BleScannerState extends State<BleScanner> {
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-Future<void> deleteDevice(String serialNumber) async {
-  final String baseUrl = 'http://192.168.0.125:8000'; // Replace this with your base URL
-  final String endpoint = '/devices/${serialNumber}/';
+  Future<void> deleteDevice(String serialNumber) async {
+    final String baseUrl =
+        'http://192.168.0.125:8000'; // Replace this with your base URL
+    final String endpoint = '/devices/${serialNumber}/';
 
-  try {
-    final response = await http.delete(Uri.parse(baseUrl + endpoint));
+    try {
+      final response = await http.delete(Uri.parse(baseUrl + endpoint));
 
-    if (response.statusCode == 200) {
-      print('Device deleted successfully');
-    } else {
-      print('Failed to delete device: ${response.reasonPhrase}');
+      if (response.statusCode == 200) {
+        serialnoController.clear();
+        showSnack('Device ${serialNumber} deleted successfully');
+        print('Device ${serialNumber} deleted successfully');
+      } else {
+        showSnack("Failed to delete");
+        print('Failed to delete device: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      showSnack("Failed to delete");
+      serialnoController.clear();
+
+      print('Error: $e');
     }
-  } catch (e) {
-    print('Error: $e');
   }
-}
+
   @override
   void initState() {
     super.initState();
+    serialnoController.clear();
   }
 
   @override

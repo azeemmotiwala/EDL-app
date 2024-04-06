@@ -50,7 +50,7 @@ class _BleScannerState extends State<BleScanner> {
   late SharedPreferences _prefs;
   late bool isConnected = false;
   bool out = false;
-  bool showVerify = true;
+  bool showVerify = false;
 
   bool isVerified = false;
   // readValues.add("");
@@ -70,58 +70,49 @@ class _BleScannerState extends State<BleScanner> {
     // await _setCommonVariable(true);
     await _loadCommonVariable();
 
-    // if (devices.length != 0) {
+    // if ((devices.length != 0)||isConnected==true) {
     //   await writeData(devices[0], "scan\r");
-    // } else {
-    //   showSnack("Device disconnected, connect again!");
-    //   isConnected = false;
-    //   _setCommonVariable(false);
-    //   devices = [];
-    //   context.read<DeviceProvider>().setDevices(devices);
-    // }
-
-    // if (devices.length != 0) {
     //   await readData(devices[0]);
+
     // } else {
     //   showSnack("Device disconnected, connect again!");
     //   isConnected = false;
     //   _setCommonVariable(false);
     //   devices = [];
     //   context.read<DeviceProvider>().setDevices(devices);
-    // }
-    // if (isConnected == false) {
-    //   devices = [];
-    //   startScanning();
     // }
     // Call _loadDevices after _prefs is initialized
   }
 
   Future<bool> verifyDevice(String rfidId) async {
-    final apiUrl = Uri.parse('http://192.168.0.125:8000/devices/${rfidId}/${DateTime.now().toIso8601String()}/verified/verify/');
+    final apiUrl = Uri.parse(
+        'http://192.168.0.125:8000/devices/${rfidId}/${DateTime.now().toIso8601String()}/verified/verify/');
     try {
-        final response = await http.put(apiUrl,
-        // body: jsonEncode({
-        //   'verify': 'verified', // Assuming 'verified' is the verification status
-        //   'prv_verify_date': "2024-04-06T11:04:42.541Z", // Set current date as previous verification date
-        // }),
-        headers: {'Content-Type': 'application/json'} // Set request header
-    );  
-    if (response.statusCode == 200) {
+      final response = await http.put(apiUrl,
+          // body: jsonEncode({
+          //   'verify': 'verified', // Assuming 'verified' is the verification status
+          //   'prv_verify_date': "2024-04-06T11:04:42.541Z", // Set current date as previous verification date
+          // }),
+          headers: {'Content-Type': 'application/json'} // Set request header
+          );
+      if (response.statusCode == 200) {
         // If the verification is successful, reload device statuss
+        setState(() {
+          isVerified = true;
+        });
         showSnack("Verified Successfully");
         return true;
-      }else if( response.statusCode == 404){
+      } else if (response.statusCode == 404) {
         showSnack("Device not found");
         return false;
-      }
-       else {
+      } else {
         showSnack("Try again, not verified");
         return false;
         // throw Exception('Failed to verify device');
       }
     } catch (error) {
       showSnack("Server Error");
-        print(error);
+      print(error);
       return false;
       // throw Exception('Failed to connect to the server');
     }
@@ -292,9 +283,11 @@ class _BleScannerState extends State<BleScanner> {
                           Text(
                             'Verified',
                             style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green),
                           ),
-                          Icon(Icons.check, color: Colors.green),
+                          Icon(Icons.check_circle_rounded, color: Colors.green),
                         ],
                       ),
                     if (!isVerified)
@@ -304,7 +297,9 @@ class _BleScannerState extends State<BleScanner> {
                             Text(
                               "Verify",
                               style: TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue),
                             )
                           ])
                   ],
@@ -378,25 +373,25 @@ class _BleScannerState extends State<BleScanner> {
             //     },
             //   ),
             // ),
-            Expanded(
-                child: ListView.builder(
-              itemCount: readValues.length, // Number of items
-              itemBuilder: (context, index) {
-                print(readValues);
-                // Use switch case to display different data based on index
-                switch (index) {
-                  case 0:
-                    return buildCard('Roll No', readValues[0]);
-                  case 1:
-                    return buildCard('Location', readValues[1]);
-                  case 2:
-                    return buildCard('Issue Date', readValues[2]);
 
-                  default:
-                    return SizedBox(); // Return an empty SizedBox for safety
-                }
-              },
-            ))
+            Expanded(
+              child: ListView.builder(
+                itemCount: readValues.length,
+                itemBuilder: (context, index) {
+                  switch (index) {
+                    case 0:
+                      return buildCard('Roll No:', readValues[0]);
+                    case 1:
+                      return buildCard('Location:', readValues[1]);
+                    case 2:
+                      return buildCard('Issue Date:', readValues[2]);
+
+                    default:
+                      return SizedBox(); // Return an empty SizedBox for safety
+                  }
+                },
+              ),
+            )
           ],
         ),
       ),
@@ -406,13 +401,34 @@ class _BleScannerState extends State<BleScanner> {
 
 Widget buildCard(String label, String value) {
   return Card(
-    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: ListTile(
-      title: Text(label),
-      subtitle: Text(value),
+    margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Row(
+        // crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Colors.lightBlueAccent),
+          ),
+          SizedBox(width: 8.0),
+          Text(
+            value,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              // fontFamily: 'Roboto',
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }
+
 
 // void writeCharacteristic(
 //     BluetoothDevice device, characteristicId, List<int> data) async {

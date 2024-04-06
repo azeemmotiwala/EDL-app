@@ -116,59 +116,63 @@ class _IssueState extends State<_Issue> {
       });
     }
   }
-void validateRequestId(String id) async {
-  final String apiUrl = 'http://192.168.0.125:8000/requests/${id}';
 
-  try {
-    final response = await http.get(Uri.parse(apiUrl));
+  void validateRequestId(String id) async {
+    final String apiUrl = 'http://192.168.0.125:8000/requests/${id}';
 
-    if (response.statusCode == 200) {
-      // If the server returns a 200 OK response, parse the JSON
-      // and extract the required data
-      final requestData = jsonDecode(response.body);
-      print(requestData);
-      // Setting state with the extracted data
-      setState(() {
-        verified = true;
-        email = requestData[3];
-        rollNo = requestData[2];
-        location = requestData[6];
-        name = requestData[4];
-        phone_no = requestData[5];
-        device = requestData[1];
-      });
-    } else {
-      // If the server returns an error response, throw an exception
-      // throw Exception('Failed to fetch request data');
-      print("e");
+    try {
+      final response = await http.get(Uri.parse(apiUrl));
+
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response, parse the JSON
+        // and extract the required data
+        final requestData = jsonDecode(response.body);
+        print(requestData);
+        // Setting state with the extracted data
+        setState(() {
+          verified = true;
+          email = requestData[3];
+          rollNo = requestData[2];
+          location = requestData[6];
+          name = requestData[4];
+          phone_no = requestData[5];
+          device = requestData[1];
+        });
+      } else {
+        showSnack("Invalid Request Id");
+        requestController.clear();
+        // If the server returns an error response, throw an exception
+        // throw Exception('Failed to fetch request data');
+        print("e");
+      }
+    } catch (e) {
+      showSnack("Invalid Request Id");
+      requestController.clear();
+      // If an error occurs during the request, throw an exception
+      print(e);
+      // throw Exception('Failed to connect to the server: $e');
     }
-  } catch (e) {
-    // If an error occurs during the request, throw an exception
-    print(e);
-    // throw Exception('Failed to connect to the server: $e');
   }
-}
-    // final apiUrl = Uri.parse('http://10.59.1.225:8000/requests/$id');
-    // try {
-    //   final response = await http.get(apiUrl);
-    //   if (response.statusCode == 200) {
-    //     List<dynamic> userRequests =
-    //         List<dynamic>.from(json.decode(response.body));
-    //     bool hasRejected = userRequests.contains('rejected');
-    //     bool hasPending = userRequests.contains('pending');
-    //     bool allApproved = !hasPending && !hasRejected;
-    //     if (allApproved == true) {
-    //       verified = true;
-    //     }
+  // final apiUrl = Uri.parse('http://10.59.1.225:8000/requests/$id');
+  // try {
+  //   final response = await http.get(apiUrl);
+  //   if (response.statusCode == 200) {
+  //     List<dynamic> userRequests =
+  //         List<dynamic>.from(json.decode(response.body));
+  //     bool hasRejected = userRequests.contains('rejected');
+  //     bool hasPending = userRequests.contains('pending');
+  //     bool allApproved = !hasPending && !hasRejected;
+  //     if (allApproved == true) {
+  //       verified = true;
+  //     }
 
-    //     return userRequests;
-    //   } else {
-    //     throw Exception('Failed to load user requests');
-    //   }
-    // } catch (error) {
-    //   throw Exception('Failed to connect to the server');
-    // }
-  
+  //     return userRequests;
+  //   } else {
+  //     throw Exception('Failed to load user requests');
+  //   }
+  // } catch (error) {
+  //   throw Exception('Failed to connect to the server');
+  // }
 
   @override
   void dispose() {
@@ -179,7 +183,7 @@ void validateRequestId(String id) async {
   @override
   Widget build(BuildContext context) {
     return ScaffoldMessenger(
-      // key: scaffoldMessengerKeyissue,
+      key: scaffoldMessengerKeyissue,
       child: Scaffold(
         appBar: AppBar(
           backgroundColor: Colors.blue, // Set background color to blue
@@ -230,7 +234,6 @@ void validateRequestId(String id) async {
                             ),
                           ],
                         ),
-
                         if (verified) SizedBox(height: 20.0),
                         if (verified)
                           Row(
@@ -247,31 +250,40 @@ void validateRequestId(String id) async {
                                         borderRadius: BorderRadius.circular(
                                             10), // Adjust border radius as needed
                                       ),
-                                      child: Text(
-                                        'Request ID Verified',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white, // Text color
-                                        ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Text(
+                                            'Request ID Verified',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.white, // Text color
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              width:
+                                                  8), // Adjust spacing between text and icon
+                                          Icon(Icons.check_circle,
+                                              color: Colors.white),
+                                        ],
                                       ),
                                     ),
-                                    Icon(Icons.check, color: Colors.green),
                                   ],
                                 )
                               ]),
                         if (!verified)
                           CardButton(
                             onPressed: () {
-                              // if (_formKey.currentState!.validate()) {
-                              print("Validate Request ID");
-                              validateRequestId(requestController.text);
-                              // }
+                              if (_formKey.currentState!.validate()) {
+                                print("Validate Request ID");
+                                validateRequestId(requestController.text);
+                                // verified = true;
+                              }
                             },
                             text: 'Verify Request ID',
                             icon: Icons.email,
                           ),
-
                         if (verified)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -296,12 +308,12 @@ void validateRequestId(String id) async {
                               ),
                               SizedBox(height: 20),
                               Text(
-                                  'Device Name:',
-                                  style: TextStyle(
-                                    fontSize: 18.0,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                'Device Name:',
+                                style: TextStyle(
+                                  fontSize: 18.0,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
                               TextFormField(
                                 enabled: false, // Disable editing
                                 initialValue: device,
@@ -309,7 +321,7 @@ void validateRequestId(String id) async {
                                   border: OutlineInputBorder(),
                                   hintText: 'Device Name',
                                 ),
-                              ),                              
+                              ),
                               SizedBox(height: 20),
                               Text(
                                 'Return Date:',

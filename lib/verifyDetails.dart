@@ -11,8 +11,17 @@ String generateRandomRequestId() {
   return randomNumber.toString();
 }
 
-
-Future<void> addRequest(String deviceName, String rollNo, String email, String name, String phoneNo, String locationOfUse, String facultyStatus, String staffStatus, String adminStatus) async {
+Future<void> addRequest(
+  String deviceName,
+  String rollNo,
+  String email,
+  String name,
+  String phoneNo,
+  String locationOfUse,
+  String facultyStatus,
+  String staffStatus,
+  String adminStatus,
+) async {
   // Define the API endpoint URL for adding a request
   final apiUrl = Uri.parse('http://192.168.0.125:8000/add-request/');
 
@@ -40,14 +49,17 @@ Future<void> addRequest(String deviceName, String rollNo, String email, String n
   try {
     // Send the HTTP POST request to add the request
     final response = await http.post(apiUrl, headers: headers, body: body);
-    
+
     // Check the response status code
     if (response.statusCode == 200) {
       print('Request added successfully');
     } else {
+      // showSnack("Server error");
       print('Failed to add request: ${response.statusCode}');
     }
   } catch (error) {
+    // showSnack("Server error");
+
     print('Error adding request: $error');
   }
 }
@@ -69,7 +81,11 @@ class VerifyDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Verify Details'),
+        title: Text(
+          'Verify Details',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.blue,
       ),
       body: Padding(
@@ -77,62 +93,128 @@ class VerifyDetailsPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildCard('Email', userData['email']),
-            _buildCard('Roll No', userData['roll_number']),
-            _buildCard('Location of Use', location),
-            _buildCard('Name', userData['first_name'] + ' ' + userData['last_name']),
-            _buildCard('Phone No', userData['contacts'][0]['number']),
-            _buildCard('Device Name', deviceName),
-            _buildCard('Faculty Email', facultyEmail),
+            Container(
+              height: MediaQuery.of(context).size.height * 0.9 / 2,
+              padding: EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10.0),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.3),
+                    spreadRadius: 2,
+                    blurRadius: 4,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDetail('Email', userData['email']),
+                  _buildDetail('Roll No', userData['roll_number']),
+                  _buildDetail('Location of Use', location),
+                  _buildDetail(
+                    'Name',
+                    userData['first_name'] + ' ' + userData['last_name'],
+                  ),
+                  _buildDetail(
+                    'Phone No',
+                    userData['contacts'][0]['number'],
+                  ),
+                  _buildDetail('Device Name', deviceName),
+                  _buildDetail('Faculty Email', facultyEmail),
+                ],
+              ),
+            ),
             SizedBox(height: 20),
-            
+            Align(
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                onPressed: () {
+                  addRequest(
+                    deviceName,
+                    userData['roll_number'],
+                    userData['email'],
+                    userData['first_name'] + ' ' + userData['last_name'],
+                    userData['contacts'][0]['number'],
+                    location,
+                    "pending",
+                    "pending",
+                    "pending",
+                  );
+
+                  // Perform verification actions here
+                  // For example, you can show a confirmation dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: Text(
+                        'Verification Successful',
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      content:
+                          Text('Your details have been verified successfully'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.popUntil(context,
+                                (Route<dynamic> route) => route.isFirst);
+                          },
+                          child: Text(
+                            'OK',
+                            style: TextStyle(color: Colors.black, fontSize: 17),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                child: Text(
+                  'Verify and Request',
+                  style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30.0),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.grey,
+                ),
+              ),
+            ),
           ],
         ),
-      ), 
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          // Perform verification actions here
-          // For example, you can show a confirmation dialog
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Verification Successful'),
-              content: Text('Your details have been verified.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    addRequest(deviceName, userData['roll_number'], userData['email'], userData['first_name'] + ' ' + userData['last_name'], userData['contacts'][0]['number'], location, "pending", "pending", "pending");
-                    Navigator.pop(context);
-                  },
-                  child: Text('OK'),
-                ),
-              ],
-            ),
-          );
-        },
-        label: Text('Verify and Request'),
-        backgroundColor: Colors.blue[100],
-        icon: Icon(Icons.verified),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 
-  Widget _buildCard(String title, String subtitle) {
-    return Card(
-      color: Colors.white, // Background color
-      child: ListTile(
-        title: Text(
-          title,
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.blue, // Title text color
+  Widget _buildDetail(String title, String subtitle) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$title: ',
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.black, fontSize: 17),
           ),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(color: Colors.black87), // Subtitle text color
-        ),
+          SizedBox(
+            width: 5,
+          ),
+          Expanded(
+            child: Text(
+              subtitle,
+              style: TextStyle(color: Colors.black87, fontSize: 17),
+            ),
+          ),
+        ],
       ),
     );
   }

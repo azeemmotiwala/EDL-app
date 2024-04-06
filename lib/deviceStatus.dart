@@ -26,7 +26,9 @@ class _DeviceStatusPageState extends State<DeviceStatusPage> {
           uniqueDevices = devices.map((device) {
             return {
               'device_name': device[0], // Extract device name
-              'status': device[2] == 0 ? 'unavailable' : 'available', // Check availability
+              'status': device[2] == 0
+                  ? 'Unavailable'
+                  : 'Available', // Check availability
               'total_count': device[1], // Extract total count
               'available_count': device[2], // Extract available count
               'not_available_count': device[3], // Calculate not available count
@@ -46,29 +48,51 @@ class _DeviceStatusPageState extends State<DeviceStatusPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Device Status'),
+        title: Text(
+          'Device Status',
+          style: TextStyle(color: Colors.white),
+        ),
+        centerTitle: true,
+        backgroundColor: Colors.blue, // Set app bar background color
       ),
       body: ListView.builder(
         itemCount: uniqueDevices.length,
         itemBuilder: (context, index) {
           final device = uniqueDevices[index];
-          return Card(
-            margin: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-            child: ListTile(
-              title: Text(
-                device['device_name'],
-                style: TextStyle(fontWeight: FontWeight.bold),
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+            child: Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
               ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Status: ${device['status']}',
-                    style: TextStyle(color: _getStatusColor(device['status'])),
+              child: ExpansionTile(
+                title: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    device['device_name'],
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
-                  Text('Total Count: ${device['total_count']}'),
-                  Text('Available Count: ${device['available_count']}'),
-                  Text('Not Available Count: ${device['not_available_count']}'),
+                ),
+                children: [
+                  Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildInfoRow('Status', device['status']),
+                        _buildInfoRow(
+                            'Total Count', device['total_count'].toString()),
+                        _buildInfoRow('Available Count',
+                            device['available_count'].toString()),
+                        _buildInfoRow('Not Available Count',
+                            device['not_available_count'].toString()),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -78,14 +102,28 @@ class _DeviceStatusPageState extends State<DeviceStatusPage> {
     );
   }
 
-  Color _getStatusColor(String status) {
-    switch (status) {
-      case 'available':
-        return Colors.green;
-      case 'unavailable':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
+  Widget _buildInfoRow(String title, String value) {
+    Color statusColor = value == 'Available' ? Colors.green : Colors.red;
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[700],
+            ),
+          ),
+          Text(
+            value,
+            style: TextStyle(
+              color: title == 'Status' ? statusColor : Colors.grey[700],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

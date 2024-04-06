@@ -77,7 +77,7 @@ void main() {
               ),
           '/issueUser': (context) => IssueUser(userData: {}),
           'logs': (context) => LogsPage(rollNo: ""),
-          '/deviceStatus' : (context) => DeviceStatusPage(),
+          '/deviceStatus': (context) => DeviceStatusPage(),
           '/verifyDetails': (context) => VerifyDetailsPage(
               userData: {}, location: "", deviceName: "", facultyEmail: "")
         },

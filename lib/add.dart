@@ -18,6 +18,8 @@ final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
 
 final TextEditingController devicenameController = TextEditingController();
+final TextEditingController locationController = TextEditingController();
+final TextEditingController descriptionController = TextEditingController();
 final TextEditingController serialnoController = TextEditingController();
 
 void showSnack(String title) {
@@ -47,7 +49,6 @@ class BleScanner extends StatefulWidget {
 }
 
 class _BleScannerState extends State<BleScanner> {
-
   List<BluetoothDevice> devices = [];
   List<String> readValues = [];
   bool check = true;
@@ -56,8 +57,8 @@ class _BleScannerState extends State<BleScanner> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool out = false;
 
-  Future<void> addDevice(
-      String deviceId, String deviceName, String serialNo, String original_location, String description)async {
+  Future<void> addDevice(String deviceId, String deviceName, String serialNo,
+      String original_location, String description) async {
     readValues = [];
     final url = Uri.parse('${startUrl}/devices/');
 
@@ -67,7 +68,7 @@ class _BleScannerState extends State<BleScanner> {
 
     Map<String, dynamic> body = {
       "serial_number": serialNo,
-      "rfid_id" : deviceId,
+      "rfid_id": deviceId,
       "device_name": deviceName,
       'original_location': original_location,
       'status': "Available",
@@ -83,6 +84,12 @@ class _BleScannerState extends State<BleScanner> {
       if (response.statusCode == 200) {
         print('Device information added successfully');
         showSnack("Device Added Successfully");
+        setState(() {
+          serialnoController.clear();
+          devicenameController.clear();
+          locationController.clear();
+          descriptionController.clear();
+        });
       } else {
         print('Failed to add device information: ${response.reasonPhrase}');
         showSnack("Failed to Add, try again");
@@ -95,9 +102,12 @@ class _BleScannerState extends State<BleScanner> {
   @override
   void initState() {
     super.initState();
+    serialnoController.clear();
+    devicenameController.clear();
+    locationController.clear();
+    descriptionController.clear();
     _initializeSharedPreferences();
-    addDevice("128376", "SMD", "1837187", "WEL-4", "Working Device");
-
+    // addDevice("128376", "SMD", "1837187", "WEL-4", "Working Device");
   }
 
   Future<void> _initializeSharedPreferences() async {
@@ -148,8 +158,12 @@ class _BleScannerState extends State<BleScanner> {
                       print("went inside");
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
-                        addDevice(readValues[0], devicenameController.text,
-                            serialnoController.text, "WEL-4", "Working Device");
+                        addDevice(
+                            readValues[0],
+                            devicenameController.text,
+                            serialnoController.text,
+                            locationController.text,
+                            descriptionController.text);
                         out = true;
                       });
                       out = true;
@@ -312,6 +326,7 @@ class _BleScannerState extends State<BleScanner> {
                             prefixIcon: Icon(Icons.numbers_outlined),
                           ),
                         ),
+                        SizedBox(height: 20),
                         Text(
                           'Device Name:',
                           style: TextStyle(
@@ -332,6 +347,52 @@ class _BleScannerState extends State<BleScanner> {
                             prefixIcon: Icon(Icons.device_hub),
                           ),
                         ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Device Location:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextFormField(
+                          controller: serialnoController,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter device location';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter Device Location',
+                            prefixIcon: Icon(Icons.location_pin),
+                          ),
+                        ),
+                        SizedBox(height: 20),
+                        Text(
+                          'Description:',
+                          style: TextStyle(
+                            fontSize: 18.0,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        TextFormField(
+                          controller: serialnoController,
+                          validator: (value) {
+                            if (value!.isEmpty) {
+                              return 'Please enter device description';
+                            }
+                            return null;
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: 'Enter Device Description',
+                            prefixIcon: Icon(
+                              Icons.info_rounded,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ],
@@ -345,15 +406,6 @@ class _BleScannerState extends State<BleScanner> {
                       // Simulating a Bluetooth device
                       if (devices.length != 0) {
                         await writeData(devices[0], "add\r");
-                      } else {
-                        showSnack("Device disconnected, connect again!");
-                        isConnected = false;
-                        _setCommonVariable(false);
-                        devices = [];
-                        context.read<DeviceProvider>().setDevices(devices);
-                      }
-
-                      if (devices.length != 0) {
                         out = false;
                         await readData(devices[0]);
                       } else {
@@ -366,40 +418,41 @@ class _BleScannerState extends State<BleScanner> {
                     }
                   : null,
               child: Text(
-                'Scan the device tag',
+                'Scan the device',
                 style: TextStyle(fontSize: 18),
               ),
             ),
+
             SizedBox(height: 20),
-            Expanded(
-              child: ListView.builder(
-                itemCount: readValues.length,
-                itemBuilder: (context, index) {
-                  return Card(
-                    elevation: 4, // Add elevation for a shadow effect
-                    margin: EdgeInsets.symmetric(
-                        vertical: 8,
-                        horizontal: 16), // Add margin for spacing between cards
-                    child: ListTile(
-                      title: Text(
-                        readValues[index],
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight:
-                                FontWeight.bold), // Customize text style
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors
-                            .blue, // Set background color for the leading icon
-                        child: Icon(Icons.check,
-                            color: Colors
-                                .white), // Set icon for the leading widget
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            // Expanded(
+            //   child: ListView.builder(
+            //     itemCount: readValues.length,
+            //     itemBuilder: (context, index) {
+            //       return Card(
+            //         elevation: 4, // Add elevation for a shadow effect
+            //         margin: EdgeInsets.symmetric(
+            //             vertical: 8,
+            //             horizontal: 16), // Add margin for spacing between cards
+            //         child: ListTile(
+            //           title: Text(
+            //             readValues[index],
+            //             style: TextStyle(
+            //                 fontSize: 16,
+            //                 fontWeight:
+            //                     FontWeight.bold), // Customize text style
+            //           ),
+            //           leading: CircleAvatar(
+            //             backgroundColor: Colors
+            //                 .blue, // Set background color for the leading icon
+            //             child: Icon(Icons.check,
+            //                 color: Colors
+            //                     .white), // Set icon for the leading widget
+            //           ),
+            //         ),
+            //       );
+            //     },
+            //   ),
+            // ),
           ],
         ),
       ),
