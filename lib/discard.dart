@@ -11,8 +11,9 @@ import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:edl_app/ip.dart';
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = ip;
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -51,8 +52,7 @@ class _BleScannerState extends State<BleScanner> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> deleteDevice(String serialNumber) async {
-    final String baseUrl =
-        'http://192.168.0.125:8000'; // Replace this with your base URL
+    final String baseUrl = ip; // Replace this with your base URL
     final String endpoint = '/devices/${serialNumber}/';
 
     try {

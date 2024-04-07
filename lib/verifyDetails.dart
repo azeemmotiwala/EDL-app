@@ -1,8 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:edl_app/ip.dart';
 
 import 'dart:math';
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyissue =
+    GlobalKey<ScaffoldMessengerState>();
+
+void showSnack(String title) {
+  final snackbar = SnackBar(
+      content: Text(
+    title,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      fontSize: 15,
+    ),
+  ));
+  scaffoldMessengerKeyissue.currentState?.showSnackBar(snackbar);
+}
 
 String generateRandomRequestId() {
   var random = Random();
@@ -15,6 +31,7 @@ Future<void> addRequest(
   String deviceName,
   String rollNo,
   String email,
+  String fm,
   String name,
   String phoneNo,
   String locationOfUse,
@@ -23,13 +40,14 @@ Future<void> addRequest(
   String adminStatus,
 ) async {
   // Define the API endpoint URL for adding a request
-  final apiUrl = Uri.parse('http://192.168.0.125:8000/add-request/');
+  final apiUrl = Uri.parse(ip + '/add-request/');
 
   // Create the payload for the request
   Map<String, dynamic> data = {
     'device_name': deviceName,
     'roll_no': rollNo,
     'email': email,
+    'faculty_email': fm,
     'name': name,
     'phone_no': phoneNo,
     'location_of_use': locationOfUse,
@@ -53,12 +71,16 @@ Future<void> addRequest(
     // Check the response status code
     if (response.statusCode == 200) {
       print('Request added successfully');
+    } else if (response.statusCode == 404) {
+      showSnack("Email not sent to Prof");
+    } else if (response.statusCode == 403) {
+      showSnack("Try again");
     } else {
-      // showSnack("Server error");
+      showSnack("Server error");
       print('Failed to add request: ${response.statusCode}');
     }
   } catch (error) {
-    // showSnack("Server error");
+    showSnack("Server error");
 
     print('Error adding request: $error');
   }
@@ -94,7 +116,7 @@ class VerifyDetailsPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              height: MediaQuery.of(context).size.height * 0.9 / 2,
+              height: MediaQuery.of(context).size.height * 1.1 / 2,
               padding: EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -136,6 +158,7 @@ class VerifyDetailsPage extends StatelessWidget {
                     deviceName,
                     userData['roll_number'],
                     userData['email'],
+                    facultyEmail,
                     userData['first_name'] + ' ' + userData['last_name'],
                     userData['contacts'][0]['number'],
                     location,

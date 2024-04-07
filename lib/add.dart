@@ -3,6 +3,10 @@
 // // // BSD-style license that can be found in the LICENSE file.
 
 import 'dart:convert';
+// import 'dart:html';
+// import 'dart:html' as html;
+// import 'dart:html' hide VoidCallback;
+
 import 'package:edl_app/issue.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -11,8 +15,9 @@ import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:edl_app/ip.dart';
 
-String startUrl = "http://192.168.0.125:8000";
+String startUrl = ip;
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -56,6 +61,7 @@ class _BleScannerState extends State<BleScanner> {
   late bool isConnected = false;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool out = false;
+  bool clicked = false;
 
   Future<void> addDevice(String deviceId, String deviceName, String serialNo,
       String original_location, String description) async {
@@ -76,21 +82,26 @@ class _BleScannerState extends State<BleScanner> {
     };
 
     try {
-      final response = await http.post(
+      final response = await http.put(
         url,
         headers: headers,
         body: json.encode(body),
       );
       if (response.statusCode == 200) {
         print('Device information added successfully');
+
         showSnack("Device Added Successfully");
         setState(() {
+          clicked = false;
           serialnoController.clear();
           devicenameController.clear();
           locationController.clear();
           descriptionController.clear();
         });
       } else {
+        setState(() {
+          clicked = false;
+        });
         print('Failed to add device information: ${response.reasonPhrase}');
         showSnack("Failed to Add, try again");
       }
@@ -102,6 +113,7 @@ class _BleScannerState extends State<BleScanner> {
   @override
   void initState() {
     super.initState();
+    clicked = false;
     serialnoController.clear();
     devicenameController.clear();
     locationController.clear();
@@ -158,6 +170,7 @@ class _BleScannerState extends State<BleScanner> {
                       print("went inside");
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
+                        print(readValues);
                         addDevice(
                             readValues[0],
                             devicenameController.text,
@@ -270,190 +283,241 @@ class _BleScannerState extends State<BleScanner> {
           ),
           centerTitle: true,
         ),
-        body: Column(
-          children: [
-            // ConnectionWidget(
-            //   isConnected: isConnected,
-            //   onConnectPressed: () {
-            //     if (devices.length == 0) {
-            //       showSnack("Try again");
-            //     }
-            //     else {
-            //       if (isConnected == false) {
-            //         connectReader(devices[0]);
-            //       }
-            //       else {
-            //         devices[0].disconnect();
-            //         setState(() {
-            //           isConnected = !isConnected;
-            //           _setCommonVariable(isConnected);
-            //         });
-            //         showSnack("Disconnected");
-            //       }
-            //     }
-            //   },
-            // ),
-            SizedBox(height: 20),
-            Padding(
-              padding: EdgeInsets.all(20.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SizedBox(height: 20.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Serial No:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          controller: serialnoController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter device serial no.';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter Serial No',
-                            prefixIcon: Icon(Icons.numbers_outlined),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Device Name:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          controller: devicenameController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter device name';
-                            }
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter Device Name',
-                            prefixIcon: Icon(Icons.device_hub),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Device Location:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          controller: serialnoController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter device location';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter Device Location',
-                            prefixIcon: Icon(Icons.location_pin),
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        Text(
-                          'Description:',
-                          style: TextStyle(
-                            fontSize: 18.0,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        TextFormField(
-                          controller: serialnoController,
-                          validator: (value) {
-                            if (value!.isEmpty) {
-                              return 'Please enter device description';
-                            }
-                            return null;
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter Device Description',
-                            prefixIcon: Icon(
-                              Icons.info_rounded,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              // ConnectionWidget(
+              //   isConnected: isConnected,
+              //   onConnectPressed: () {
+              //     if (devices.length == 0) {
+              //       showSnack("Try again");
+              //     }
+              //     else {
+              //       if (isConnected == false) {
+              //         connectReader(devices[0]);
+              //       }
+              //       else {
+              //         devices[0].disconnect();
+              //         setState(() {
+              //           isConnected = !isConnected;
+              //           _setCommonVariable(isConnected);
+              //         });
+              //         showSnack("Disconnected");
+              //       }
+              //     }
+              //   },
+              // ),
+              SizedBox(height: 20),
+              Padding(
+                padding: EdgeInsets.all(20.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      SizedBox(height: 20.0),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Serial No:',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
                             ),
+                          ),
+                          TextFormField(
+                            controller: serialnoController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please enter device serial no.';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter Serial No',
+                              prefixIcon: Icon(Icons.numbers_outlined),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            'Device Name:',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextFormField(
+                            controller: devicenameController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please enter device name';
+                              }
+                            },
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter Device Name',
+                              prefixIcon: Icon(Icons.device_hub),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            'Device Location:',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextFormField(
+                            controller: locationController,
+                            validator: (value) {
+                              if (value!.isEmpty) {
+                                return 'Please enter device location';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter Device Location',
+                              prefixIcon: Icon(Icons.location_pin),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                          Text(
+                            'Description:',
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextFormField(
+                            controller: descriptionController,
+                            validator: (value) {
+                              // if (value!.isEmpty) {
+                              //   return 'Please enter device description';
+                              // }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: 'Enter Device Description',
+                              prefixIcon: Icon(
+                                Icons.info_rounded,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 16.0),
+              if (clicked == false)
+                ElevatedButton(
+                  onPressed: isConnected
+                      ? () async {
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              clicked = true;
+                            });
+                            // clicked = true;
+                            // Simulating a Bluetooth device
+                            if (devices.length != 0) {
+                              clicked = true;
+                              await writeData(devices[0], "add\r");
+                              out = false;
+                              await readData(devices[0]);
+                            } else {
+                              showSnack("Device disconnected, connect again!");
+                              isConnected = false;
+                              _setCommonVariable(false);
+                              devices = [];
+                              context
+                                  .read<DeviceProvider>()
+                                  .setDevices(devices);
+                            }
+                          }
+                        }
+                      : null,
+                  child: Text(
+                    'Add the device',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                ),
+
+              if (clicked)
+                Center(
+                  child: Container(
+                    width: 300, // Adjust width as needed
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Color.fromARGB(255, 109, 163, 208),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.5),
+                          spreadRadius: 5,
+                          blurRadius: 7,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.bluetooth_searching,
+                          size: 50,
+                          color: Colors.white,
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          'Scan the Device...',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            SizedBox(height: 16.0),
-            ElevatedButton(
-              onPressed: isConnected
-                  ? () async {
-                      // Simulating a Bluetooth device
-                      if (devices.length != 0) {
-                        await writeData(devices[0], "add\r");
-                        out = false;
-                        await readData(devices[0]);
-                      } else {
-                        showSnack("Device disconnected, connect again!");
-                        isConnected = false;
-                        _setCommonVariable(false);
-                        devices = [];
-                        context.read<DeviceProvider>().setDevices(devices);
-                      }
-                    }
-                  : null,
-              child: Text(
-                'Scan the device',
-                style: TextStyle(fontSize: 18),
-              ),
-            ),
 
-            SizedBox(height: 20),
-            // Expanded(
-            //   child: ListView.builder(
-            //     itemCount: readValues.length,
-            //     itemBuilder: (context, index) {
-            //       return Card(
-            //         elevation: 4, // Add elevation for a shadow effect
-            //         margin: EdgeInsets.symmetric(
-            //             vertical: 8,
-            //             horizontal: 16), // Add margin for spacing between cards
-            //         child: ListTile(
-            //           title: Text(
-            //             readValues[index],
-            //             style: TextStyle(
-            //                 fontSize: 16,
-            //                 fontWeight:
-            //                     FontWeight.bold), // Customize text style
-            //           ),
-            //           leading: CircleAvatar(
-            //             backgroundColor: Colors
-            //                 .blue, // Set background color for the leading icon
-            //             child: Icon(Icons.check,
-            //                 color: Colors
-            //                     .white), // Set icon for the leading widget
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //   ),
-            // ),
-          ],
+              SizedBox(height: 20),
+              // Expanded(
+              //   child: ListView.builder(
+              //     itemCount: readValues.length,
+              //     itemBuilder: (context, index) {
+              //       return Card(
+              //         elevation: 4, // Add elevation for a shadow effect
+              //         margin: EdgeInsets.symmetric(
+              //             vertical: 8,
+              //             horizontal: 16), // Add margin for spacing between cards
+              //         child: ListTile(
+              //           title: Text(
+              //             readValues[index],
+              //             style: TextStyle(
+              //                 fontSize: 16,
+              //                 fontWeight:
+              //                     FontWeight.bold), // Customize text style
+              //           ),
+              //           leading: CircleAvatar(
+              //             backgroundColor: Colors
+              //                 .blue, // Set background color for the leading icon
+              //             child: Icon(Icons.check,
+              //                 color: Colors
+              //                     .white), // Set icon for the leading widget
+              //           ),
+              //         ),
+              //       );
+              //     },
+              //   ),
+              // ),
+            ],
+          ),
         ),
       ),
     );

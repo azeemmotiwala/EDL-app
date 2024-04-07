@@ -1,7 +1,9 @@
 import 'dart:convert';
 
+import 'package:edl_app/add.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:edl_app/ip.dart';
 
 class LogsPage extends StatefulWidget {
   final String rollNo;
@@ -24,17 +26,18 @@ class _LogsPageState extends State<LogsPage> {
 
   Future<void> fetchLogs() async {
     try {
-      final response = await http
-          .get(Uri.parse('http://192.168.0.125:8000/logs/${widget.rollNo}'));
+      final response = await http.get(Uri.parse(ip + '/logs/${widget.rollNo}'));
       if (response.statusCode == 200) {
         setState(() {
           logs = json.decode(response.body)['logs'];
           isLoading = false;
         });
       } else {
-        throw Exception('Failed to fetch logs');
+        showSnack("Server error");
+        // throw Exception('Failed to fetch logs');
       }
     } catch (e) {
+      showSnack("Server error");
       print('Error fetching logs: $e');
       setState(() {
         isLoading = false;

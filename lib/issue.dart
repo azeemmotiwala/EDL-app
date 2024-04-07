@@ -10,6 +10,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:edl_app/connection.dart';
 import 'package:edl_app/issueVerification.dart';
 import 'package:http/http.dart' as http;
+import 'package:edl_app/ip.dart';
 
 final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
@@ -19,7 +20,7 @@ final TextEditingController phoneController = TextEditingController();
 final TextEditingController nameController = TextEditingController();
 final TextEditingController returnDateController = TextEditingController();
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = ip;
 
 // Future<void> sendOTP(String email) async {
 //   try {
@@ -118,7 +119,7 @@ class _IssueState extends State<_Issue> {
   }
 
   void validateRequestId(String id) async {
-    final String apiUrl = 'http://192.168.0.125:8000/requests/${id}';
+    final String apiUrl = ip + '/requests/${id}';
 
     try {
       final response = await http.get(Uri.parse(apiUrl));
@@ -138,12 +139,21 @@ class _IssueState extends State<_Issue> {
           phone_no = requestData[5];
           device = requestData[1];
         });
-      } else {
+      } else if (response.statusCode == 404) {
         showSnack("Invalid Request Id");
         requestController.clear();
         // If the server returns an error response, throw an exception
         // throw Exception('Failed to fetch request data');
         print("e");
+      } else if (response.statusCode == 403) {
+        showSnack("Request Not Approved");
+        requestController.clear();
+        // If the server returns an error response, throw an exception
+        // throw Exception('Failed to fetch request data');
+        print("e");
+      } else {
+        showSnack("Server Error");
+        requestController.clear();
       }
     } catch (e) {
       showSnack("Invalid Request Id");

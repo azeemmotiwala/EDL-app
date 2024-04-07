@@ -12,8 +12,9 @@ import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:edl_app/ip.dart';
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = ip;
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -110,7 +111,7 @@ class _BleScannerState extends State<BleScanner> {
       String locationOfUse,
       DateTime issueDate,
       DateTime returnDeadline) async {
-    final logsApiUrl = 'http://192.168.0.125:8000/logs/issue/';
+    final logsApiUrl = ip + '/logs/issue/';
 
     try {
       // Issue device by adding a new entry to logs
@@ -142,8 +143,7 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
-    final devicesApiUrl =
-        'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
+    final devicesApiUrl = ip + '/devices/${deviceRfidId}/status/${newStatus}/';
 
     try {
       // Update device status

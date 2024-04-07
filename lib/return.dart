@@ -12,8 +12,9 @@ import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:edl_app/ip.dart';
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = ip;
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -101,8 +102,7 @@ class _BleScannerState extends State<BleScanner> {
   }
 
   Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
-    final devicesApiUrl =
-        'http://192.168.0.125:8000/devices/${deviceRfidId}/status/${newStatus}/';
+    final devicesApiUrl = ip + '/devices/${deviceRfidId}/status/${newStatus}/';
 
     try {
       // Update device status
@@ -129,7 +129,7 @@ class _BleScannerState extends State<BleScanner> {
 
   Future<void> _returnDevice(DateTime return_date, String rfidId) async {
     final apiUrl = Uri.parse(
-        'http://192.168.0.125:8000/logs/${rfidId}/return/${return_date.toIso8601String()}');
+        ip + '/logs/${rfidId}/return/${return_date.toIso8601String()}');
     // final returnDate = _returnDateController.text;
     try {
       final response = await http.put(
@@ -139,32 +139,41 @@ class _BleScannerState extends State<BleScanner> {
       if (response.statusCode == 200) {
         updateDeviceStatus(rfidId, "Available");
         _getLogsByRfid(rfidId);
-      } else {}
-    } catch (error) {}
+      } else if (response.statusCode == 404) {
+        showSnack("Device not issued yet");
+      } else {
+        showSnack("Server error, return again");
+      }
+    } catch (error) {
+      showSnack("Server error");
+    }
   }
 
   Future<void> _getLogsByRfid(String rfidId) async {
     try {
-      final response = await http
-          .get(Uri.parse('http://192.168.0.125:8000/logs/rfid/$rfidId'));
-      if (response.statusCode == 200) {
-        // print(jsonDecode(response.body)['logs']);
-        List<String> res = jsonDecode(response.body)['logs'];
-        setState(() {
-          logs.add(res[1]);
-          logs.add(res[3]);
-          logs.add(res[5]);
-          showinfo = true;
-        });
+      final response = await http.get(Uri.parse(ip + '/logs/rfid/$rfidId'));
+      // if (response.statusCode == 200) {
+      // print(jsonDecode(response.body)['logs']);
+      List<dynamic> res = jsonDecode(response.body)['logs'][0];
+      print(res);
+      setState(() {
+        logs.add(res[1]);
+        logs.add(res[3]);
+        logs.add(res[5]);
+        showinfo = true;
+      });
+      showSnack("Returned Successfully");
+      print(showinfo);
 
-        // logs.add(res[1]);
-        print(
-            "'++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
-      } else if (response.statusCode == 404) {
-      } else {
-        throw Exception('Failed to fetch logs');
-      }
+      // logs.add(res[1]);
+      print(
+          "'++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+      // } else if (response.statusCode == 404) {
+      // } else {
+      //   throw Exception('Failed to fetch logs');
+      // }
     } catch (error) {
+      print(error);
     } finally {}
   }
 
@@ -189,6 +198,7 @@ class _BleScannerState extends State<BleScanner> {
                       print("went inside");
                       setState(() {
                         readValues.add(String.fromCharCodes(value));
+                        print(readValues);
                         out = true;
                         _returnDevice(DateTime.now(), readValues[0]);
                       });
@@ -230,6 +240,7 @@ class _BleScannerState extends State<BleScanner> {
         for (BluetoothCharacteristic c in service.characteristics) {
           if (c.properties.write) {
             final command = s;
+            print(s);
             final convertedCommand = AsciiEncoder().convert(command);
             await c.write(convertedCommand);
           }
@@ -385,7 +396,7 @@ class _BleScannerState extends State<BleScanner> {
             if (showinfo)
               Expanded(
                   child: ListView.builder(
-                itemCount: 8, // Number of items
+                itemCount: logs.length, // Number of items
                 itemBuilder: (context, index) {
                   // Use switch case to display different data based on index
                   switch (index) {
@@ -400,7 +411,7 @@ class _BleScannerState extends State<BleScanner> {
                       return SizedBox(); // Return an empty SizedBox for safety
                   }
                 },
-              ))
+              )),
           ],
         ),
       ),

@@ -74,10 +74,11 @@ class _HomeState extends State<Home> {
     // Perform actions you want when navigating back to the home page
     print("Navigated back to home page");
     await _loadCommonVariable();
+
+    // final deviceProvider = Provider.of<DeviceProvider>(context);
+    // devices = deviceProvider.devices;
     // ignore: deprecated_member_use
-    if ((isConnected == false) ||
-        // ignore: deprecated_member_use
-        (devices[0].state != BluetoothDeviceState.connected)) {
+    if (isConnected == false) {
       // print(devices);
       isConnected = false;
       _setCommonVariable(false);
@@ -234,7 +235,7 @@ class _HomeState extends State<Home> {
                             showSnack("Not Connected");
                           }
                         } else if (index == 3) {
-                          if (isConnected == false) {
+                          if (isConnected == true) {
                             // Navigator.pushNamed(context, '/add');
                             Navigator.of(context)
                                 .pushNamed('/add')

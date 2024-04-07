@@ -35,7 +35,7 @@ void main() {
         debugShowCheckedModeBanner: false,
         initialRoute: '/login',
         routes: {
-          // '/signup': (context) => SignupPage(),
+          '/signup': (context) => SignupPage(),
           '/home': (context) => Home(
                 userData: {},
               ),
@@ -44,6 +44,7 @@ void main() {
           '/issue': (context) => Issue(),
           '/verification': (context) => OTPVerificationPage(
                 email: "",
+                username: "",
                 onVerificationSuccess: () => {},
               ),
           '/issueVerification': (context) => IssueOTPVerificationPage(
@@ -71,7 +72,6 @@ void main() {
           '/return': (context) => Return(),
           '/add': (context) => Add(),
           '/discard': (context) => Discard(),
-
           '/request': (context) => RequestPage(
                 rollNo: "",
               ),

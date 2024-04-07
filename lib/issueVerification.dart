@@ -4,8 +4,23 @@ import 'package:edl_app/issuePage.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:edl_app/issue.dart';
+import 'package:edl_app/ip.dart';
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = ip;
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyissue =
+    GlobalKey<ScaffoldMessengerState>();
+
+void showSnack(String title) {
+  final snackbar = SnackBar(
+      content: Text(
+    title,
+    textAlign: TextAlign.center,
+    style: TextStyle(
+      fontSize: 15,
+    ),
+  ));
+  scaffoldMessengerKeyissue.currentState?.showSnackBar(snackbar);
+}
 
 class IssueOTPVerificationPage extends StatefulWidget {
   final String email;
@@ -47,7 +62,7 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
         print('OTP sent successfully');
       } else {
         print('Failed to send OTP');
-        throw Exception('Failed to send OTP');
+        showSnack('Failed to send OTP');
       }
     } catch (e) {
       print('Error sending OTP: $e');
@@ -93,13 +108,14 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => IssuePage(
-                        rollNo: widget.rollNo,
-                        location: widget.location,
-                        phone_no: widget.phone_no,
-                        name: widget.name,
-                        issue_date: widget.issue_date,
-                        return_date: widget.return_date,
-                        device: "",),
+                      rollNo: widget.rollNo,
+                      location: widget.location,
+                      phone_no: widget.phone_no,
+                      name: widget.name,
+                      issue_date: widget.issue_date,
+                      return_date: widget.return_date,
+                      device: "",
+                    ),
                   ),
                 );
                 // .then((val) => {Navigator.pop(_context)});
@@ -135,7 +151,7 @@ class _OTPVerificationPageState extends State<IssueOTPVerificationPage> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: ScaffoldMessenger(
-        // key: scaffoldMessengerKey,
+        key: scaffoldMessengerKeyissue,
         child: Scaffold(
           body: SingleChildScrollView(
             child: Container(

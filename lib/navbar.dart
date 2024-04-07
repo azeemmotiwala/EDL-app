@@ -63,7 +63,7 @@
 //             title: Text('Log Out'),
 //             leading: Icon(Icons.logout),
 //             onTap: (){
-            
+
 //             },
 //           ),
 //         ],
@@ -71,6 +71,7 @@
 //     );
 //   }
 // }
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:edl_app/deviceStatus.dart';
 import 'package:edl_app/login.dart';
@@ -112,14 +113,18 @@ class _SideBarState extends State<SideBar> {
         padding: EdgeInsets.zero,
         children: [
           UserAccountsDrawerHeader(
-            accountName: Text(name),
-            accountEmail: Text(email),
+            accountName: Text(
+              name,
+              style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+            ),
+            accountEmail: Text(
+              email,
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             decoration: BoxDecoration(
               color: Colors.blue,
               image: DecorationImage(
-                fit: BoxFit.fill,
-                image: NetworkImage('https://oflutter.com/wp-content/uploads/2021/02/profile-bg3.jpg'),
-              ),
+                  fit: BoxFit.fill, image: AssetImage('assets/back.jpeg')),
             ),
           ),
           ListTile(
@@ -134,7 +139,8 @@ class _SideBarState extends State<SideBar> {
               );
             },
           ),
-          ListTile( // Add a new ListTile for navigating to the LogsPage
+          ListTile(
+            // Add a new ListTile for navigating to the LogsPage
             leading: Icon(Icons.article),
             title: Text('Logs'),
             onTap: () {
@@ -146,7 +152,8 @@ class _SideBarState extends State<SideBar> {
               );
             },
           ),
-          ListTile( // Add a new ListTile for navigating to the LogsPage
+          ListTile(
+            // Add a new ListTile for navigating to the LogsPage
             leading: Icon(Icons.device_hub),
             title: Text('Device List'),
             onTap: () {
@@ -162,9 +169,17 @@ class _SideBarState extends State<SideBar> {
           ListTile(
             title: Text('Log Out'),
             leading: Icon(Icons.logout),
-            onTap: (){
-              // Add logout functionality here
-              Navigator.pushNamed(context, '/login');
+            onTap: () async {
+              // Clear shared preferences data
+              final SharedPreferences prefs =
+                  await SharedPreferences.getInstance();
+              // await prefs.remove('accessToken');
+              await prefs.remove('userData');
+              await prefs.setBool("isprof", false);
+
+              // Navigate back to the login page
+              Navigator.pushNamedAndRemoveUntil(
+                  context, '/login', (route) => false);
             },
           ),
         ],

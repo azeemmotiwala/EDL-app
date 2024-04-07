@@ -1,6 +1,8 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:edl_app/ip.dart';
 
 class DeviceStatusPage extends StatefulWidget {
   @override
@@ -9,15 +11,25 @@ class DeviceStatusPage extends StatefulWidget {
 
 class _DeviceStatusPageState extends State<DeviceStatusPage> {
   List<Map<String, dynamic>> uniqueDevices = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    getDeviceStatus();
+    getDeviceStatus().then((_) {
+      setState(() {
+        isLoading = false;
+      });
+    }).catchError((error) {
+      print(error);
+      setState(() {
+        isLoading = false;
+      });
+    });
   }
 
   Future<void> getDeviceStatus() async {
-    final apiUrl = Uri.parse('http://192.168.0.125:8000/unique-devices/');
+    final apiUrl = Uri.parse(ip + '/unique-devices/');
     try {
       final response = await http.get(apiUrl);
       if (response.statusCode == 200) {
@@ -25,22 +37,20 @@ class _DeviceStatusPageState extends State<DeviceStatusPage> {
         setState(() {
           uniqueDevices = devices.map((device) {
             return {
-              'device_name': device[0], // Extract device name
-              'status': device[2] == 0
-                  ? 'Unavailable'
-                  : 'Available', // Check availability
-              'total_count': device[1], // Extract total count
-              'available_count': device[2], // Extract available count
-              'not_available_count': device[3], // Calculate not available count
+              'device_name': device[0],
+              'status': device[2] == 0 ? 'Unavailable' : 'Available',
+              'total_count': device[1],
+              'available_count': device[2],
+              'not_available_count': device[3],
             };
           }).toList();
         });
       } else {
-        throw Exception('Failed to load device status');
+        showSnack("Failed to load devices");
       }
     } catch (error) {
       print(error);
-      throw Exception('Failed to connect to the server');
+      showSnack('Failed to connect to the server');
     }
   }
 
@@ -53,52 +63,55 @@ class _DeviceStatusPageState extends State<DeviceStatusPage> {
           style: TextStyle(color: Colors.white),
         ),
         centerTitle: true,
-        backgroundColor: Colors.blue, // Set app bar background color
+        backgroundColor: Colors.blue,
       ),
-      body: ListView.builder(
-        itemCount: uniqueDevices.length,
-        itemBuilder: (context, index) {
-          final device = uniqueDevices[index];
-          return Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-            child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: ExpansionTile(
-                title: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    device['device_name'],
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 18,
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: uniqueDevices.length,
+              itemBuilder: (context, index) {
+                final device = uniqueDevices[index];
+                return Padding(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                  child: Card(
+                    elevation: 4,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
-                  ),
-                ),
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: ExpansionTile(
+                      title: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          device['device_name'],
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
                       children: [
-                        _buildInfoRow('Status', device['status']),
-                        _buildInfoRow(
-                            'Total Count', device['total_count'].toString()),
-                        _buildInfoRow('Available Count',
-                            device['available_count'].toString()),
-                        _buildInfoRow('Not Available Count',
-                            device['not_available_count'].toString()),
+                        Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildInfoRow('Status', device['status']),
+                              _buildInfoRow('Total Count',
+                                  device['total_count'].toString()),
+                              _buildInfoRow('Available Count',
+                                  device['available_count'].toString()),
+                              _buildInfoRow('Not Available Count',
+                                  device['not_available_count'].toString()),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
-          );
-        },
-      ),
     );
   }
 
@@ -125,5 +138,11 @@ class _DeviceStatusPageState extends State<DeviceStatusPage> {
         ],
       ),
     );
+  }
+
+  void showSnack(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(message),
+    ));
   }
 }

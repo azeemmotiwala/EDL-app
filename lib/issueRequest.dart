@@ -11,6 +11,7 @@ import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:edl_app/connection.dart';
 import 'package:edl_app/issueVerification.dart';
 import 'package:http/http.dart' as http;
+import 'package:edl_app/ip.dart';
 
 final TextEditingController emailController = TextEditingController();
 final TextEditingController rollnoController = TextEditingController();
@@ -99,16 +100,20 @@ class _IssueState extends State<_Issue> {
       Duration(days: 365 * 3)); // Default return date is current date + 3 years
 
   Future<void> fetchDeviceNames() async {
-    final response = await http
-        .get(Uri.parse('http://192.168.0.125:8000/unique-device-names/'));
-    if (response.statusCode == 200) {
-      List<dynamic> data = json.decode(response.body);
-      print(data);
-      setState(() {
-        deviceNames = data.cast<String>();
-      });
-    } else {
-      throw Exception('Failed to fetch device names');
+    try {
+      final response = await http.get(Uri.parse(ip + '/unique-device-names/'));
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        print(data);
+        setState(() {
+          deviceNames = data.cast<String>();
+        });
+      } else {
+        showSnack("Failed to fetch device names");
+        // throw Exception('Failed to fetch device names');
+      }
+    } catch (err) {
+      showSnack("Failed to fetch device names");
     }
   }
 

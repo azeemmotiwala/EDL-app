@@ -11,8 +11,9 @@ import 'package:edl_app/connection.dart';
 import "package:shared_preferences/shared_preferences.dart";
 import 'package:edl_app/deviceprovider.dart';
 import 'package:provider/provider.dart';
+import 'package:edl_app/ip.dart';
 
-String startUrl = "http://192.168.43.144:8000";
+String startUrl = ip;
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKeyscan =
     GlobalKey<ScaffoldMessengerState>();
@@ -51,15 +52,15 @@ class _BleScannerState extends State<BleScanner> {
   late bool isConnected = false;
   bool out = false;
   bool showVerify = false;
-
+  bool isempty = false;
   bool isVerified = false;
   // readValues.add("");
   @override
   void initState() {
     // readValues.add("210070093, Hostel - 6, 2024-04-01");
-    readValues.add("210070058");
-    readValues.add("h 6");
-    readValues.add("2024-12-01");
+    // readValues.add("210070058");
+    // readValues.add("h 6");
+    // readValues.add("2024-12-01");
     super.initState();
     _initializeSharedPreferences();
   }
@@ -70,23 +71,26 @@ class _BleScannerState extends State<BleScanner> {
     // await _setCommonVariable(true);
     await _loadCommonVariable();
 
-    // if ((devices.length != 0)||isConnected==true) {
-    //   await writeData(devices[0], "scan\r");
-    //   await readData(devices[0]);
-
-    // } else {
-    //   showSnack("Device disconnected, connect again!");
-    //   isConnected = false;
-    //   _setCommonVariable(false);
-    //   devices = [];
-    //   context.read<DeviceProvider>().setDevices(devices);
-    // }
+    if ((devices.length != 0) || isConnected == true) {
+      try {
+        await writeData(devices[0], "scan\r");
+        await readData(devices[0]);
+      } catch (er) {
+        showSnack("Device disconnected, connect again!");
+      }
+    } else {
+      showSnack("Device disconnected, connect again!");
+      isConnected = false;
+      _setCommonVariable(false);
+      devices = [];
+      context.read<DeviceProvider>().setDevices(devices);
+    }
     // Call _loadDevices after _prefs is initialized
   }
 
   Future<bool> verifyDevice(String rfidId) async {
-    final apiUrl = Uri.parse(
-        'http://192.168.0.125:8000/devices/${rfidId}/${DateTime.now().toIso8601String()}/verified/verify/');
+    final apiUrl = Uri.parse(ip +
+        '/devices/${rfidId}/${DateTime.now().toIso8601String()}/verified/verify/');
     try {
       final response = await http.put(apiUrl,
           // body: jsonEncode({
@@ -154,8 +158,17 @@ class _BleScannerState extends State<BleScanner> {
                     if (String.fromCharCodes(value) != "") {
                       print("went inside");
                       setState(() {
-                        readValues = String.fromCharCodes(value).split(",");
-                        showVerify = true;
+                        if (String.fromCharCodes(value).split(",").length ==
+                            2) {
+                          isempty = true;
+                          print(String.fromCharCodes(value).split(",")[1]);
+                          // showSnack("Scan ");
+                        } else {
+                          readValues = String.fromCharCodes(value).split(",");
+                          showVerify = true;
+                          showSnack("Scanned successfully");
+                        }
+
                         out = true;
                       });
                       out = true;
@@ -267,11 +280,88 @@ class _BleScannerState extends State<BleScanner> {
         body: Column(
           children: [
             SizedBox(height: 20),
+            if (!showVerify && !isempty)
+              Center(
+                child: Container(
+                  width: 300, // Adjust width as needed
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 109, 163, 208),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.bluetooth_searching,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Scan the Device...',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
 
-            if (showVerify)
+            if (isempty)
+              Center(
+                child: Container(
+                  width: 300, // Adjust width as needed
+                  padding: EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Color.fromARGB(255, 109, 163, 208),
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.5),
+                        spreadRadius: 5,
+                        blurRadius: 7,
+                        offset: Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.info_outline,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        'Tag is Empty...',
+                        style: TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            if (showVerify && !isempty)
               ElevatedButton(
                 onPressed: () {
-                  verifyDevice("297999823");
+                  verifyDevice(readValues[3]);
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -385,6 +475,8 @@ class _BleScannerState extends State<BleScanner> {
                       return buildCard('Location:', readValues[1]);
                     case 2:
                       return buildCard('Issue Date:', readValues[2]);
+                    case 3:
+                      return buildCard('RFID:', readValues[3]);
 
                     default:
                       return SizedBox(); // Return an empty SizedBox for safety
