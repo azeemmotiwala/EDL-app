@@ -101,10 +101,78 @@
 // }
 
 
+import 'dart:convert';
+
 import 'package:edl_app/issueRequest.dart';
 import 'package:flutter/material.dart';
 import 'package:edl_app/navbar.dart';
 import 'package:edl_app/request.dart'; // Import the RequestPage
+import 'package:http/http.dart' as http;
+import 'package:edl_app/ip.dart';
+
+Future<bool> checkUserExistence(String rollNumber) async {
+  final String apiUrl = ip1 + '/users/exists/$rollNumber'; // Replace this with your API endpoint
+
+  try {
+    final response = await http.get(Uri.parse(apiUrl));
+    
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      return responseData['exists'];
+    } else {
+      print('Failed to check user existence: ${response.body}');
+      return false;
+    }
+  } catch (error) {
+    print('Error checking user existence: $error');
+    return false;
+  }
+}
+  
+
+Future<void> createUserIfNotExists(Map<String, dynamic> user) async {
+  final String rollNumber = user['roll_number'];
+  bool userExists = await checkUserExistence(rollNumber);
+
+  if (!userExists) {
+    final String apiUrl = ip1 + '/users/'; // Replace this with your API endpoint
+    
+    // Convert user object to JSON
+    final Map<String, dynamic> userData = {
+      'roll_no': user['roll_number'],
+      'name': user['first_name'] + ' ' + user['last_name'],
+      'email': user['email'],
+      'department': user['program']['department'],
+      'degree': user['program']['degree'],
+      'year_of_study': user['program']['join_year'].toString(),
+      'phone_no': user['contacts'][0]['number'].toString()
+    };
+    print(userData);
+    print("=========");
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(userData),
+      );
+
+      if (response.statusCode == 200) {
+        // User created successfully
+        print('User created successfully');
+      } else {
+        // Error creating user
+        print('Failed to create user: ${response.body}');
+      }
+    } catch (error) {
+      print('Error creating user: $error');
+    }
+  } else {
+    print('User already exists');
+  }
+}
 
 class UserPage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -116,6 +184,13 @@ class UserPage extends StatefulWidget {
 }
 
 class _UserState extends State<UserPage> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    createUserIfNotExists(widget.userData);
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

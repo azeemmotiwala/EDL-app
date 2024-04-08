@@ -79,16 +79,16 @@ import 'package:edl_app/logs.dart'; // Import the LogsPage
 import 'package:edl_app/request.dart';
 import 'package:flutter/material.dart';
 
-class SideBar extends StatefulWidget {
+class SideBarAdmin extends StatefulWidget {
   final Map<String, dynamic> userData;
 
-  const SideBar({Key? key, required this.userData}) : super(key: key);
+  const SideBarAdmin({Key? key, required this.userData}) : super(key: key);
 
   @override
-  State<SideBar> createState() => _SideBarState();
+  State<SideBarAdmin> createState() => _SideBarState();
 }
 
-class _SideBarState extends State<SideBar> {
+class _SideBarState extends State<SideBarAdmin> {
   late String name;
   late String rollNumber;
   late String email;
@@ -127,44 +127,6 @@ class _SideBarState extends State<SideBar> {
                   fit: BoxFit.fill, image: AssetImage('assets/back.jpeg')),
             ),
           ),
-          ListTile(
-            leading: Icon(Icons.notifications),
-            title: Text('Request'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => RequestPage(rollNo: rollNumber),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            // Add a new ListTile for navigating to the LogsPage
-            leading: Icon(Icons.article),
-            title: Text('Logs'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => LogsPage(rollNo: rollNumber),
-                ),
-              );
-            },
-          ),
-          ListTile(
-            // Add a new ListTile for navigating to the LogsPage
-            leading: Icon(Icons.device_hub),
-            title: Text('Device List'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DeviceStatusPage(),
-                ),
-              );
-            },
-          ),
           Divider(),
           ListTile(
             title: Text('Log Out'),
@@ -176,6 +138,7 @@ class _SideBarState extends State<SideBar> {
               // await prefs.remove('accessToken');
               await prefs.remove('userData');
               await prefs.remove("isprof");
+
               // Navigate back to the login page
               Navigator.pushNamedAndRemoveUntil(
                   context, '/login', (route) => false);

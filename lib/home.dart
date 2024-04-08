@@ -1,3 +1,4 @@
+import 'package:edl_app/navbar_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:edl_app/navbar.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
@@ -154,7 +155,7 @@ class _HomeState extends State<Home> {
             ),
             centerTitle: true,
           ),
-          drawer: SideBar(
+          drawer: SideBarAdmin(
             userData: widget.userData,
           ),
           body: Column(

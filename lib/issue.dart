@@ -134,7 +134,7 @@ class _IssueState extends State<_Issue> {
           verified = true;
           email = requestData[3];
           rollNo = requestData[2];
-          location = requestData[6];
+          location = requestData[7];
           name = requestData[4];
           phone_no = requestData[5];
           device = requestData[1];

@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:edl_app/userpage.dart';
 import 'package:edl_app/home.dart';
+import 'package:edl_app/ip.dart';
 
 const String clientId = 'TJh0OvVfNjOiFn6USmuL4QjaXm7np6dnQNSLxPyU';
 const String clientSecret =
@@ -20,13 +21,12 @@ class _LoginPageState extends State<LoginPage> {
   String _deepLink = '';
   String? _accessToken;
   Map<String, dynamic>? _userData;
-  bool _isLoading = false;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     checkLoginStatus();
-
     initUniLinks();
   }
 
@@ -59,6 +59,9 @@ class _LoginPageState extends State<LoginPage> {
         );
       }
     }
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> initUniLinks() async {
@@ -118,6 +121,9 @@ class _LoginPageState extends State<LoginPage> {
     } catch (err) {}
   }
 
+
+ 
+    
   Future<void> fetchUserData(String accessToken) async {
     final userApiUrl =
         'https://gymkhana.iitb.ac.in/profiles/user/api/user/?fields=first_name,last_name,type,profile_picture,sex,username,email,program,contacts,insti_address,secondary_emails,mobile,roll_number';
@@ -133,17 +139,6 @@ class _LoginPageState extends State<LoginPage> {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('userData', json.encode(userData));
         await prefs.setBool("isprof", false);
-        // if (userData['roll_number'] == "210070093") {
-        //   Navigator.pop(context);
-        //   Navigator.push(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => Home(
-        //         userData: userData,
-        //       ),
-        //     ),
-        //   );
-        // } else {
         Navigator.pop(context);
         Navigator.push(
           context,
@@ -153,7 +148,6 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
         );
-        // }
       } else {
         setState(() {
           _isLoading = false;
@@ -180,21 +174,8 @@ class _LoginPageState extends State<LoginPage> {
         ),
         body: Stack(
           children: [
-            // _buildBackgroundAnimation(),
             _isLoading ? _buildLoadingScreen() : _buildLoginScreen(),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildBackgroundAnimation() {
-    return Container(
-      color: Colors.black,
-      child: Center(
-        child: Text(
-          'Your Background Animation',
-          style: TextStyle(color: Colors.white),
         ),
       ),
     );
@@ -265,14 +246,10 @@ class _LoginPageState extends State<LoginPage> {
         'scope=basic profile picture sex ldap phone insti_address program secondary_emails send_mail&'
         'state=some_state';
 
-    // if (await canLaunch(authorizationUrl)) {
     try {
       await launch(authorizationUrl);
     } catch (Err) {
       showSnack("Server error");
     }
-    // } else {
-    //   print('Failed to launch authorization URL');
-    // }
   }
 }

@@ -142,6 +142,30 @@ class _BleScannerState extends State<BleScanner> {
     }
   }
 
+    Future<void> _updateRequestIssuedStatus(int requestId) async {
+    final url = Uri.parse(ip+'/requests/$requestId/issue/yes');
+
+    try {
+      final response = await http.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        // Request successfully updated
+        print('Request issued status updated to $issued');
+      } else {
+        // Handle other status codes (e.g., 404, 500)
+        print('Failed to update request issued status: ${response.statusCode}');
+      }
+    } catch (error) {
+      // Handle network errors
+      print('Failed to connect to server: $error');
+    }
+  }
+
   Future<void> updateDeviceStatus(String deviceRfidId, String newStatus) async {
     final devicesApiUrl = ip + '/devices/${deviceRfidId}/status/${newStatus}/';
 
@@ -241,6 +265,7 @@ class _BleScannerState extends State<BleScanner> {
                             widget.issue_date,
                             widget.return_date);
                         updateDeviceStatus(readValues[0], "Not Available");
+                        _updateRequestIssuedStatus(int.parse(requestController.text));
                         issued = true;
 
                         out = true;
