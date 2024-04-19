@@ -1,0 +1,634 @@
+@import url('https://fonts.googleapis.com/css?family=Source+Code+Pro:200');
+
+
+*{
+  margin: 0;
+  padding: 0;
+}
+section{
+  position: relative;
+  width: 100%;
+  height: 20vh;
+  background: #3586ff;
+  overflow: hidden;
+}
+section .air{
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: url(https://1.bp.blogspot.com/-xQUc-TovqDk/XdxogmMqIRI/AAAAAAAACvI/AizpnE509UMGBcTiLJ58BC6iViPYGYQfQCLcBGAsYHQ/s1600/wave.png);
+  background-size: 1000px 100px
+}
+section .air.air1{
+  animation: wave 40s linear infinite;
+  z-index: 1000;
+  opacity: 1;
+  animation-delay: 0s;
+  bottom: 0;
+}
+section .air.air2{
+  animation: wave2 25s linear infinite;
+  z-index: 999;
+  opacity: 0.5;
+  animation-delay: -5s;
+  bottom: 10px;
+}
+section .air.air3{
+  animation: wave 40s linear infinite;
+  z-index: 998;
+  opacity: 0.2;
+  animation-delay: -2s;
+  bottom: 15px;
+}
+section .air.air4{
+  animation: wave2 15s linear infinite;
+  z-index: 997;
+  opacity: 0.7;
+  animation-delay: -5s;
+  bottom: 20px;
+}
+@keyframes wave{
+  0%{
+    background-position-x: 0px; 
+  }
+  100%{
+    background-position-x: 1000px; 
+  }
+}
+@keyframes wave2{
+  0%{
+    background-position-x: 0px; 
+  }
+  100%{
+    background-position-x: -1000px; 
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* 
+
+
+body  {
+    background-image: url('https://static.pexels.com/photos/414171/pexels-photo-414171.jpeg');
+  background-size:cover;
+        -webkit-animation: slidein 100s;
+        animation: slidein 100s;
+
+        -webkit-animation-fill-mode: forwards;
+        animation-fill-mode: forwards;
+
+        -webkit-animation-iteration-count: infinite;
+        animation-iteration-count: infinite;
+
+        -webkit-animation-direction: alternate;
+        animation-direction: alternate;              
+}
+
+@-webkit-keyframes slidein {
+from {background-position: top; background-size:3000px; }
+to {background-position: -100px 0px;background-size:2750px;}
+}
+
+@keyframes slidein {
+from {background-position: top;background-size:3000px; }
+to {background-position: -100px 0px;background-size:2750px;}
+
+}
+
+
+
+.center
+{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: rgba(75, 75, 250, 0.3);
+  border-radius: 3px;
+}
+.center h1{
+  text-align:center;
+  color:white;
+  font-family: 'Source Code Pro', monospace;
+  text-transform:uppercase;
+}
+ */
+
+
+body {
+  font-family: sans-serif;
+  margin: 0;
+  
+ 
+    padding-top: 0px;
+    padding-right: 20px;
+    padding-bottom: 5px;
+    padding-left: 10px;
+  background-color: white 
+
+}
+
+
+
+
+
+
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.right-align {
+  text-align: right;
+}
+
+
+#deviceInfo h31 {
+  margin-right: 20px; /* Adjust this value to your preference */
+}
+#deviceInfo h31 {
+  font-weight: bold;
+}
+
+
+.container {
+  display: flex;
+  width: 100%; /* Fill entire viewport width */
+}
+
+
+.next-button {
+  display: inline-block;
+  padding: 10px 20px;
+  margin-bottom: 50px;
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.next-button:hover {
+  background-color: #0056b3;
+}
+
+
+.reload {
+  position: relative;
+  /* left: 1; Adjust the distance from the left side */
+  /* top: 20px;  */
+  display: inline-block;
+  align-content: left;
+  padding: 10px 20px;
+  margin-left: 10px;
+  margin-bottom: 50px;
+  background-color:  #007bff;
+  color: #fff;
+  text-decoration: none;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+}
+.reload:hover {
+  background-color: #0056b3;
+}
+
+
+
+
+.filters {
+  flex: 0 0 22%; /* 22% width, flex-grow: 0, flex-shrink: 0 */
+  background-color: #edeaea74; /*White background */
+  padding: 20px;
+  box-sizing: border-box;
+  border-right: 1px solid #ddd; /* Border to separate from table */
+}
+
+.filters h2 {
+  margin-bottom: 15px;
+  color: #333; /* Darker text color */
+}
+
+.filter-group {
+  margin-bottom: 15px;
+}
+
+.filter-group h4 {
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  color: #333;
+}
+.filter-date label {
+  margin-bottom: 100px; /* Adjust the value as needed */
+}
+
+.filter-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.filter-group li {
+  margin-bottom: 5px;
+}
+
+.filter-group a {
+  text-decoration: none;
+  color: #333;
+}
+
+.filter-group label {
+/* Display labels on separate lines */
+  margin-bottom: 5px;
+  font-size:small;
+}
+
+.filter-group input[type="text"],
+.filter-group input[type="date"] {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%; /* Make input fields fill available space */
+}
+
+.filter-group button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #4CAF50; /* Green button color */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-group button:hover {
+  background-color: #3e8e41; /* Darker green on hover */
+}
+
+
+#filter-status a.active {
+  font-weight: bold; /* Change the color to whatever you prefer */
+}
+
+.table-container {
+  flex: 1; /* Take up remaining space */
+  padding: 20px;
+}
+
+.table-container h2 {
+  padding-bottom: 20px;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table tbody tr:hover {
+  background-color: rgba(173, 216, 230, 0.227); /* Change to whatever color you prefer */
+}
+
+th {
+  padding: 12px;
+  border: 1px solid  #d2cdcd;
+  text-align: left;
+  background-color:  #f1eeee;
+}
+td {
+  padding: 12px;
+  border: 1px solid  #d2cdcd;
+  text-align: left;
+  
+}
+
+
+th {
+  font-weight: bold;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Space between elements */
+  margin-top: 20px;
+  padding-bottom: 10px;
+
+}
+
+#search-input {
+  padding: 10px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px 0 0 5px;
+  width: calc(100% - 80px); /* Adjust width for button */
+}
+
+#search-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #2196F3; /* Blue button color */
+  color: white;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}
+
+#search-button:hover {
+  background-color: #1769aa; /* Darker blue on hover */
+}
+
+#search-results {
+  margin-top: 20px;
+}
+
+#remove-filters-button {
+  background-color: #66686a;  /* Blue color */
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#remove-filters-button:hover {
+  background-color: #2980b9;  /* Darker blue on hover */
+}
+
+
+/* CSS */
+/* Dropdown arrow */
+.dropdown {
+  display: inline-block;
+  cursor: pointer;
+  margin-left: 5px; /* Adjust as needed */
+}
+
+/* Dropdown content */
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  z-index: 1;
+  padding: 10px;
+  margin-top: 5px; /* Adjust as needed */
+}
+/* Style for dialog box */
+#myDialog {
+  width: 300px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  box-shadow: 0px 0px 10px rgba(97, 92, 92, 0.1);
+}
+
+#myDialog[open] h2 {
+  margin-top: 0;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+#myDialog[open] p {
+  margin-bottom: 20px;
+}
+
+#myDialog[open] button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+#myDialog[open] button:hover {
+  opacity: 0.8;
+}
+
+#myDialog[open] button:first-child {
+  background-color: #ddd;
+  color: #333;
+}
+
+#myDialog button:last-child {
+align-items: center ;
+  background-color: #333;
+  color: #fff;
+}
+
+/* Style for table */
+#product-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#product-table th,
+#product-table td {
+  padding: 10px;
+  /* border: 1px solid #ddd; */
+}
+
+#product-table th {
+  background-color: #f2f2f2;
+  text-align: left;
+}
+
+#product-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#product-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+#product-table td button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  background-color:#f1eeee;
+  color: #000000;
+  cursor: pointer;
+  padding: 12px;
+  border: 1px solid  #d2cdcd;
+  text-align: left;
+  background-color:  #f1eeee;
+  /* font-weight: bold; */
+  font-size:medium
+}
+
+#product-table td button:hover {
+  opacity: 0.9;
+}
+
+#myDialog[open] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.ok-button {
+  margin-top: 20px; /* Adjust as needed */
+  padding: 100px 20px; /* Adjust padding as needed */
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+#myDialog[open] .ok-button {
+  position: relative;
+  margin-top: 200px; /* Adjust the margin top value as needed */
+  padding: 10px 20px; /* Adjust padding as needed */
+  background-color: #000;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+#login-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f0f0;
+}
+
+#login-container {
+  background-color: #fff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 100%;
+}
+
+#login-container h2 {
+  text-align: center;
+}
+
+.input-group {
+  margin-bottom: 20px;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#add-mail {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 16px;
+}
+#go-home-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-size: 16px;
+}
+
+.home-go {
+  margin-top: 20px;
+  background-color: #4CAF50; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 10px; /* Adjust padding to make button shorter */
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px; /* Adjust font size */
+  /* border-radius: 5px; */
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+
+button:hover {
+  background-color: #0056b3;
+}
+
+#login-container {
+  /* Your existing styles */
+  position: relative; /* Required for positioning success message */
+}
+
+.success-message {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50; /* Green color */
+  color: #fff; /* White text */
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow effect */
+}
+
+/* Add styles for the go-home button */
+#go-home-btn {
+
+ margin-top: 20px;
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 5px 10px; /* Adjust padding to make button shorter */
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px; /* Adjust font size */
+    /* border-radius: 5px; */
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+#go-home-btn:hover {
+    background-color: #45a049; /* Darker green on hover */
+}

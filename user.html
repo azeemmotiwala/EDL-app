@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDL User Logs</title>
+    <link rel="stylesheet" href="style.css">
+    
+</head>
+<body>
+
+  <dialog id="myDialog">
+    <h2 class="font-bold">User Details</h2>
+    <table id="userDataTable">
+      <!-- Table body -->
+      <tbody>
+        <!-- Data will be dynamically added here -->
+      </tbody>
+    </table>
+  
+ 
+    <button class="px-4 py-2 mt-4 text-white bg-black border" onclick="closeDialog()">Ok</button>
+  </dialog>
+
+  <section>
+    <div class='air air1'></div>
+    <div class='air air2'></div>
+    <div class='air air3'></div>
+    <div class='air air4'></div>
+  </section>
+  
+    <div class="container">
+        <div class="filters">
+          <a href="device.html" class="next-button">Go to Device Logs &rarr;</a>
+          <a href="home.html" class="home-go">Home &#8962;</a>
+            <h2>Filters</h2>
+            <!-- <div class="filter-group">
+                <h4>Category</h4>
+                <ul id="filter-category">
+                    <li><a href="#" data-filter="all">All</a></li>
+                    <li><a href="#" data-filter="electronics">Electronics</a></li>
+                    <li><a href="#" data-filter="clothing">Clothing</a></li>
+                </ul>
+            </div> -->
+            <div class="search-bar">
+              <input type="text" id="search-input" placeholder="Roll no/ Device name...">
+              <button id="search-button">Search</button>
+          </div>
+            <div class="filter-group">
+              <div class="filter-date">
+                <h4>Issue Date</h4>
+                <label for="start-date">Start Date:</label>
+                <input type="date" id="start-date">
+                <br> </br>
+                <label for="end-date">End Date:</label>
+                <input type="date" id="end-date">
+                <br></br>
+                <button id="date-filter-button">Apply</button>
+            </div>
+        </div>
+
+        <div class="filter-group">
+          <h4>Status</h4>
+          <ul id="filter-status">
+            <li><a href="#" data-filter="all">All</a></li>
+              <li><a href="#" data-filter="returned">Returned </a></li>
+              <li><a href="#" data-filter="not returned">Not Returned</a></li>
+            
+          </ul>
+      </div>
+<!-- 
+        <div class="filter-group">
+          <h4>Status</h4>
+          <ul id="filter-status">
+            <li><a href="#" data-filter="all">All</a></li>
+              <li><a href="#" data-filter="issued">Issued</a></li>
+              <li><a href="#" data-filter="not issued">Not Issued</a></li>
+            
+          </ul>
+      </div> -->
+
+
+          <div class="filter-group">
+            <h4>Devices</h4>
+            <ul id="filter-products">
+              <!-- Add checkboxes dynamically using JavaScript -->
+            </ul>
+          </div>
+        <!-- </div> -->
+            
+
+
+      <button id="remove-filters-button">Remove All Filters</button>
+
+            <!-- <div class="filter-group">
+                <h4>Price</h4>
+                <ul id="filter-price">
+                    <li><a href="#" data-filter="all">All</a></li>
+                    <li><a href="#" data-filter="under-50">Under $50</a></li>
+                    <li><a href="#" data-filter="50-200">  $50 - $200</a></li>
+                    <li><a href="#" data-filter="above-200">Above $200</a></li>
+                </ul>
+            </div> -->
+        </div>
+        <div class="table-container">
+
+
+          <div class="header">
+            <h2>User Logs</h2>
+            <button onclick="reload()", class = "reload">Reload &#8634</button>
+            <div id="deviceInfo" class="right-align">
+
+
+             <h31> Total logs: <span id="totalLogs"></span> </h31>
+             <!-- <h31>  Issued: <span id="totalIssued"></span>  </h31>
+             <h31>  Not issued: <span id = "totalNotissued"></span> </h31> -->
+              <!-- <h3 id="totalDevices">Total devices: <span></span></h3>
+              <h3 id="totalIssued">Issued: <span></span></h3>
+              <h3 id="totalIssued">Not issued: <span></span></h3> -->
+            </div>
+        </div>
+
+
+      
+            <table>
+                <thead>
+                    <tr>
+                      <th>Log id</th>
+                      <th>Roll No</th>
+                     
+                        <th>Tag Id</th>
+                        <th>Device Name</th>
+                        <th>Location</th>
+                        <th>Issue Date</th>
+                        <th>Return Deadline</th>
+                        <th>Return Date</th>
+                        <th> Extended Deadline</th>
+                    </tr>
+                </thead>
+                <tbody id="product-table">
+         
+                    </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="script_user.js">
+
+  
+         
+
+      // bydefault();          
+    </script>
+</body>
+</html>
